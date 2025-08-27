@@ -5,7 +5,7 @@ export default function Home() {
   return (
     <>
       <Hero />
-      <Container className="py-6">
+      <Container>
       </Container>
     </>
   );
