@@ -117,14 +117,14 @@ export default function Hero() {
         className="relative w-full overflow-hidden"
         style={{ height: '70vh' }}
       >
-        <div className="flex h-full">
+        <div className="flex flex-col md:flex-row h-full">
           {heroPanels.map((panel) => (
             <div
               key={panel.id}
               className={`relative group transition-all duration-500 ease-in-out overflow-hidden ${
                 expandedPanel === panel.id
-                  ? 'flex-[3] z-20 ring-4 ring-white/30 shadow-2xl'
-                  : 'flex-1 opacity-75 cursor-pointer'
+                  ? 'md:flex-[3] z-20 ring-4 ring-white/30 shadow-2xl'
+                  : 'md:flex-1 opacity-75 cursor-pointer'
               }`}
               onClick={() => handlePanelClick(panel.id)}
             >
