@@ -6,10 +6,13 @@
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "format": "prettier --write .",
+    "prepare": "husky"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
+    "autoprefixer": "^10.4.21",
     "date-fns": "^4.1.0",
     "next": "15.5.2",
     "react": "19.1.0",
