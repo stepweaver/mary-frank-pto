@@ -133,6 +133,7 @@ export default function Hero() {
                   src={panel.bgImage}
                   alt={panel.title}
                   fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
                   className="object-cover w-full h-full"
                   priority={panel.id === 'pto-branding'}
                 />
