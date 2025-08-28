@@ -112,58 +112,51 @@ export default function Hero() {
   }
 
   return (
-    <>
-      <section
-        className="relative w-full overflow-hidden"
-        style={{ height: '70vh' }}
-      >
-        <div className="flex flex-col md:flex-row h-full">
-          {heroPanels.map((panel) => (
-            <div
-              key={panel.id}
-              className={`relative group transition-all duration-500 ease-in-out overflow-hidden ${
-                expandedPanel === panel.id
-                  ? 'md:flex-[3] z-20 ring-4 ring-white/30 shadow-2xl'
-                  : 'md:flex-1 opacity-75 cursor-pointer'
-              }`}
-              onClick={() => handlePanelClick(panel.id)}
-            >
-              <div className="absolute inset-0">
-                <Image
-                  src={panel.bgImage}
-                  alt={panel.title}
-                  fill
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
-                  className="object-cover w-full h-full"
-                  priority={panel.id === 'pto-branding'}
-                />
-                <div
-                  className={`absolute inset-0 ${panel.bgColor} opacity-85`}
-                />
-              </div>
-
-              <div className="relative z-10 h-full flex flex-col justify-center p-4 lg:p-6">
-                {expandedPanel === panel.id ? (
-                  <div className="h-full flex flex-col justify-center items-center">
-                    <div className="w-full max-w-4xl">{panel.content}</div>
-                  </div>
-                ) : (
-                  <div className="text-center text-white h-full flex flex-col justify-center items-center">
-                    <div className="space-y-3">
-                      <h2 className="text-xl lg:text-2xl font-bold drop-shadow-lg">
-                        {panel.title}
-                      </h2>
-                      <p className="text-sm lg:text-base opacity-90 drop-shadow-md px-2">
-                        {panel.description}
-                      </p>
-                    </div>
-                  </div>
-                )}
-              </div>
+    <section className="relative w-full overflow-hidden">
+      <div className="flex flex-col md:flex-row h-full min-h-[70vh]">
+        {heroPanels.map((panel) => (
+          <div
+            key={panel.id}
+            className={`relative group transition-all duration-500 ease-in-out overflow-hidden ${
+              expandedPanel === panel.id
+                ? 'md:flex-[3] z-20 ring-4 ring-white/30 shadow-2xl'
+                : 'md:flex-1 opacity-75 cursor-pointer'
+            } ${expandedPanel === panel.id ? 'flex-1' : 'flex-1'}`}
+            onClick={() => handlePanelClick(panel.id)}
+          >
+            <div className="absolute inset-0">
+              <Image
+                src={panel.bgImage}
+                alt={panel.title}
+                fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                className="object-cover w-full h-full"
+                priority={panel.id === 'pto-branding'}
+              />
+              <div className={`absolute inset-0 ${panel.bgColor} opacity-85`} />
             </div>
-          ))}
-        </div>
-      </section>
-    </>
+
+            <div className="relative z-10 h-full flex flex-col justify-center p-4 lg:p-6">
+              {expandedPanel === panel.id ? (
+                <div className="h-full flex flex-col justify-center items-center">
+                  <div className="w-full max-w-4xl">{panel.content}</div>
+                </div>
+              ) : (
+                <div className="text-center text-white h-full flex flex-col justify-center items-center">
+                  <div className="space-y-3">
+                    <h2 className="text-xl lg:text-2xl font-bold drop-shadow-lg">
+                      {panel.title}
+                    </h2>
+                    <p className="text-sm lg:text-base opacity-90 drop-shadow-md px-2">
+                      {panel.description}
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
   )
 }
