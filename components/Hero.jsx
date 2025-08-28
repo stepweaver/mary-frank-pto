@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
+import { MapPinIcon } from '@heroicons/react/24/outline'
 
 const heroPanels = [
   {
@@ -139,7 +140,7 @@ export default function Hero() {
     return time.toLocaleTimeString('en-US', {
       hour: 'numeric',
       minute: '2-digit',
-      hour12: true
+      hour12: true,
     })
   }
 
@@ -154,7 +155,11 @@ export default function Hero() {
     } else if (date.toDateString() === tomorrow.toDateString()) {
       return 'Tomorrow'
     } else {
-      return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
+      return date.toLocaleDateString('en-US', {
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
+      })
     }
   }
 
@@ -188,50 +193,171 @@ export default function Hero() {
                 <div className="h-full flex flex-col justify-center items-center">
                   <div className="w-full max-w-4xl">
                     {panel.id === 'events' ? (
-                      <div className="space-y-6">
-                        <div className="text-center mb-6">
-                          <h1 className="text-4xl lg:text-5xl font-bold text-white mb-3">
-                            This Week Events
+                      <div className="space-y-4">
+                        <div className="mb-4">
+                          <h1 className="text-4xl lg:text-5xl font-bold text-white mb-2">
+                            Upcoming Events
                           </h1>
-                          <p className="text-white text-lg mb-4 max-w-2xl">
-                            Don't miss what is happening at Mary Frank this week.
+                          <p className="text-white text-lg max-w-2xl">
+                            Don't miss what a thing!
                           </p>
                         </div>
-                        
+
                         {loading ? (
-                          <div className="text-center">
+                          <div>
                             <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
                             <p className="text-white mt-2">Loading events...</p>
                           </div>
                         ) : events.length > 0 ? (
-                          <div className="space-y-4">
-                            {events.map((event) => (
-                              <div key={event.id} className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
-                                <div className="flex items-start justify-between">
-                                  <div className="flex-1">
-                                    <h3 className="text-white font-semibold text-lg mb-1">{event.title}</h3>
-                                    {event.location && (
-                                      <p className="text-white/80 text-sm mb-2">
-                                        📍 {event.location}
-                                      </p>
-                                    )}
-                                    <div className="flex items-center space-x-4 text-white/90 text-sm">
-                                      <span>{formatEventDate(event.start)}</span>
-                                      <span>•</span>
-                                      <span>{formatEventTime(event.start)}</span>
+                          <div className="max-w-4xl">
+                            <div className="grid grid-cols-3 gap-6">
+                              {/* This Week */}
+                              <div className="space-y-3">
+                                <h3 className="text-white font-semibold text-base text-center mb-3">
+                                  This Week
+                                </h3>
+                                {events
+                                  .filter((event) => {
+                                    const eventDate = new Date(event.start)
+                                    const today = new Date()
+                                    const weekFromNow = new Date(
+                                      today.getTime() + 7 * 24 * 60 * 60 * 1000
+                                    )
+                                    return (
+                                      eventDate >= today &&
+                                      eventDate <= weekFromNow
+                                    )
+                                  })
+                                  .slice(0, 3)
+                                  .map((event) => (
+                                    <div
+                                      key={event.id}
+                                      className="bg-white/15 backdrop-blur-sm rounded-lg p-3 border border-white/20"
+                                    >
+                                      <div className="text-white font-medium text-sm mb-2">
+                                        {event.title}
+                                      </div>
+                                      {event.location && (
+                                        <div className="flex items-center text-white/70 text-xs mb-1">
+                                          <MapPinIcon className="h-3 w-3 mr-1 text-green-200" />
+                                          <span>{event.location}</span>
+                                        </div>
+                                      )}
+                                      <div className="text-white/70 text-xs">
+                                        {new Date(
+                                          event.start
+                                        ).toLocaleDateString('en-US', {
+                                          weekday: 'short',
+                                          month: 'short',
+                                          day: 'numeric',
+                                        })}{' '}
+                                        • {formatEventTime(event.start)}
+                                      </div>
                                     </div>
-                                  </div>
-                                </div>
+                                  ))}
                               </div>
-                            ))}
+
+                              {/* Next Week */}
+                              <div className="space-y-3">
+                                <h3 className="text-white font-semibold text-base text-center mb-3">
+                                  Next Week
+                                </h3>
+                                {events
+                                  .filter((event) => {
+                                    const eventDate = new Date(event.start)
+                                    const today = new Date()
+                                    const weekFromNow = new Date(
+                                      today.getTime() + 7 * 24 * 60 * 60 * 1000
+                                    )
+                                    const twoWeeksFromNow = new Date(
+                                      today.getTime() + 14 * 24 * 60 * 60 * 1000
+                                    )
+                                    return (
+                                      eventDate > weekFromNow &&
+                                      eventDate <= twoWeeksFromNow
+                                    )
+                                  })
+                                  .slice(0, 3)
+                                  .map((event) => (
+                                    <div
+                                      key={event.id}
+                                      className="bg-white/15 backdrop-blur-sm rounded-lg p-3 border border-white/20"
+                                    >
+                                      <div className="text-white font-medium text-sm mb-2">
+                                        {event.title}
+                                      </div>
+                                      {event.location && (
+                                        <div className="flex items-center text-white/70 text-xs mb-1">
+                                          <MapPinIcon className="h-3 w-3 mr-1 text-green-200" />
+                                          <span>{event.location}</span>
+                                        </div>
+                                      )}
+                                      <div className="text-white/70 text-xs">
+                                        {new Date(
+                                          event.start
+                                        ).toLocaleDateString('en-US', {
+                                          weekday: 'short',
+                                          month: 'short',
+                                          day: 'numeric',
+                                        })}{' '}
+                                        • {formatEventTime(event.start)}
+                                      </div>
+                                    </div>
+                                  ))}
+                              </div>
+
+                              {/* Upcoming */}
+                              <div className="space-y-3">
+                                <h3 className="text-white font-semibold text-base text-center mb-3">
+                                  Upcoming
+                                </h3>
+                                {events
+                                  .filter((event) => {
+                                    const eventDate = new Date(event.start)
+                                    const today = new Date()
+                                    const twoWeeksFromNow = new Date(
+                                      today.getTime() + 14 * 24 * 60 * 60 * 1000
+                                    )
+                                    return eventDate > twoWeeksFromNow
+                                  })
+                                  .slice(0, 3)
+                                  .map((event) => (
+                                    <div
+                                      key={event.id}
+                                      className="bg-white/15 backdrop-blur-sm rounded-lg p-3 border border-white/20"
+                                    >
+                                      <div className="text-white font-medium text-sm mb-2">
+                                        {event.title}
+                                      </div>
+                                      {event.location && (
+                                        <div className="flex items-center text-white/70 text-xs mb-1">
+                                          <MapPinIcon className="h-3 w-3 mr-1 text-green-200" />
+                                          <span>{event.location}</span>
+                                        </div>
+                                      )}
+                                      <div className="text-white/70 text-xs">
+                                        {new Date(
+                                          event.start
+                                        ).toLocaleDateString('en-US', {
+                                          month: 'short',
+                                          day: 'numeric',
+                                        })}{' '}
+                                        • {formatEventTime(event.start)}
+                                      </div>
+                                    </div>
+                                  ))}
+                              </div>
+                            </div>
                           </div>
                         ) : (
-                          <div className="text-center">
-                            <p className="text-white/80 text-lg">No upcoming events this week</p>
+                          <div>
+                            <p className="text-white/80 text-lg">
+                              No upcoming events this week
+                            </p>
                           </div>
                         )}
-                        
-                        <div className="text-center mt-6">
+
+                        <div className="mt-4">
                           <a
                             href="/events"
                             className="inline-flex items-center border-2 border-white bg-transparent text-white px-6 py-3 rounded-lg font-semibold hover:bg-white hover:text-teal-600 transition-all duration-300"
