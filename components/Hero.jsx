@@ -236,7 +236,7 @@ export default function Hero() {
                             Upcoming Events
                           </h1>
                           <p className="text-white text-lg max-w-2xl">
-                            Don't miss what a thing!
+                            Don't miss a thing!
                           </p>
                         </div>
 
