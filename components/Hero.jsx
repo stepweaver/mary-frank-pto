@@ -163,6 +163,43 @@ export default function Hero() {
     }
   }
 
+  const formatEventDateTime = (event) => {
+    const startDate = new Date(event.start)
+    const endDate = event.end ? new Date(event.end) : null
+    const isMultiDay =
+      endDate && startDate.toDateString() !== endDate.toDateString()
+
+    if (isMultiDay) {
+      return (
+        <span>
+          {startDate.toLocaleDateString('en-US', {
+            weekday: 'short',
+            month: 'short',
+            day: 'numeric',
+          })}
+          , {formatEventTime(event.start)} -{' '}
+          {endDate.toLocaleDateString('en-US', {
+            weekday: 'short',
+            month: 'short',
+            day: 'numeric',
+          })}
+          , {formatEventTime(event.end)}
+        </span>
+      )
+    } else {
+      return (
+        <span>
+          {startDate.toLocaleDateString('en-US', {
+            weekday: 'short',
+            month: 'short',
+            day: 'numeric',
+          })}
+          , {formatEventTime(event.start)}
+        </span>
+      )
+    }
+  }
+
   return (
     <section className="relative w-full overflow-hidden">
       <div className="flex flex-col md:flex-row h-full min-h-[70vh]">
@@ -237,24 +274,39 @@ export default function Hero() {
                                       <div className="text-white font-medium text-sm mb-2">
                                         {event.title}
                                       </div>
+                                      {event.description && (
+                                        <div className="text-white/90 text-xs mb-2 leading-relaxed">
+                                          {event.description}
+                                        </div>
+                                      )}
                                       {event.location && (
-                                        <div className="flex items-center text-white/70 text-xs mb-1">
+                                        <div className="flex items-center text-white text-xs mb-1">
                                           <MapPinIcon className="h-3 w-3 mr-1 text-green-200" />
                                           <span>{event.location}</span>
                                         </div>
                                       )}
-                                      <div className="text-white/70 text-xs">
-                                        {new Date(
-                                          event.start
-                                        ).toLocaleDateString('en-US', {
-                                          weekday: 'short',
-                                          month: 'short',
-                                          day: 'numeric',
-                                        })}{' '}
-                                        • {formatEventTime(event.start)}
+                                      <div className="text-white text-xs">
+                                        {formatEventDateTime(event)}
                                       </div>
                                     </div>
                                   ))}
+                                {events.filter((event) => {
+                                  const eventDate = new Date(event.start)
+                                  const today = new Date()
+                                  const weekFromNow = new Date(
+                                    today.getTime() + 7 * 24 * 60 * 60 * 1000
+                                  )
+                                  return (
+                                    eventDate >= today &&
+                                    eventDate <= weekFromNow
+                                  )
+                                }).length === 0 && (
+                                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/20 text-center">
+                                    <div className="text-white/60 text-xs">
+                                      No events this week
+                                    </div>
+                                  </div>
+                                )}
                               </div>
 
                               {/* Next Week */}
@@ -286,24 +338,42 @@ export default function Hero() {
                                       <div className="text-white font-medium text-sm mb-2">
                                         {event.title}
                                       </div>
+                                      {event.description && (
+                                        <div className="text-white/90 text-xs mb-2 leading-relaxed">
+                                          {event.description}
+                                        </div>
+                                      )}
                                       {event.location && (
-                                        <div className="flex items-center text-white/70 text-xs mb-1">
+                                        <div className="flex items-center text-white text-xs mb-1">
                                           <MapPinIcon className="h-3 w-3 mr-1 text-green-200" />
                                           <span>{event.location}</span>
                                         </div>
                                       )}
-                                      <div className="text-white/70 text-xs">
-                                        {new Date(
-                                          event.start
-                                        ).toLocaleDateString('en-US', {
-                                          weekday: 'short',
-                                          month: 'short',
-                                          day: 'numeric',
-                                        })}{' '}
-                                        • {formatEventTime(event.start)}
+                                      <div className="text-white text-xs">
+                                        {formatEventDateTime(event)}
                                       </div>
                                     </div>
                                   ))}
+                                {events.filter((event) => {
+                                  const eventDate = new Date(event.start)
+                                  const today = new Date()
+                                  const weekFromNow = new Date(
+                                    today.getTime() + 7 * 24 * 60 * 60 * 1000
+                                  )
+                                  const twoWeeksFromNow = new Date(
+                                    today.getTime() + 14 * 24 * 60 * 60 * 1000
+                                  )
+                                  return (
+                                    eventDate > weekFromNow &&
+                                    eventDate <= twoWeeksFromNow
+                                  )
+                                }).length === 0 && (
+                                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/20 text-center">
+                                    <div className="text-white/60 text-xs">
+                                      No events next week
+                                    </div>
+                                  </div>
+                                )}
                               </div>
 
                               {/* Upcoming */}
@@ -329,23 +399,36 @@ export default function Hero() {
                                       <div className="text-white font-medium text-sm mb-2">
                                         {event.title}
                                       </div>
+                                      {event.description && (
+                                        <div className="text-white/90 text-xs mb-2 leading-relaxed">
+                                          {event.description}
+                                        </div>
+                                      )}
                                       {event.location && (
-                                        <div className="flex items-center text-white/70 text-xs mb-1">
+                                        <div className="flex items-center text-white text-xs mb-1">
                                           <MapPinIcon className="h-3 w-3 mr-1 text-green-200" />
                                           <span>{event.location}</span>
                                         </div>
                                       )}
-                                      <div className="text-white/70 text-xs">
-                                        {new Date(
-                                          event.start
-                                        ).toLocaleDateString('en-US', {
-                                          month: 'short',
-                                          day: 'numeric',
-                                        })}{' '}
-                                        • {formatEventTime(event.start)}
+                                      <div className="text-white text-xs">
+                                        {formatEventDateTime(event)}
                                       </div>
                                     </div>
                                   ))}
+                                {events.filter((event) => {
+                                  const eventDate = new Date(event.start)
+                                  const today = new Date()
+                                  const twoWeeksFromNow = new Date(
+                                    today.getTime() + 14 * 24 * 60 * 60 * 1000
+                                  )
+                                  return eventDate > twoWeeksFromNow
+                                }).length === 0 && (
+                                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/20 text-center">
+                                    <div className="text-white/60 text-xs">
+                                      No upcoming events
+                                    </div>
+                                  </div>
+                                )}
                               </div>
                             </div>
                           </div>
