@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Image from 'next/image'
 
 const heroPanels = [
@@ -104,10 +104,57 @@ const heroPanels = [
 
 export default function Hero() {
   const [expandedPanel, setExpandedPanel] = useState('pto-branding')
+  const [events, setEvents] = useState([])
+  const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    if (expandedPanel === 'events') {
+      fetchEvents()
+    }
+  }, [expandedPanel])
+
+  const fetchEvents = async () => {
+    setLoading(true)
+    try {
+      const response = await fetch('/api/events?maxResults=3')
+      const data = await response.json()
+      if (data.success) {
+        setEvents(data.data.events)
+      }
+    } catch (error) {
+      console.error('Error fetching events:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const handlePanelClick = (panelId) => {
     if (expandedPanel !== panelId) {
       setExpandedPanel(panelId)
+    }
+  }
+
+  const formatEventTime = (startTime) => {
+    const time = new Date(startTime)
+    return time.toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    })
+  }
+
+  const formatEventDate = (startTime) => {
+    const date = new Date(startTime)
+    const today = new Date()
+    const tomorrow = new Date(today)
+    tomorrow.setDate(tomorrow.getDate() + 1)
+
+    if (date.toDateString() === today.toDateString()) {
+      return 'Today'
+    } else if (date.toDateString() === tomorrow.toDateString()) {
+      return 'Tomorrow'
+    } else {
+      return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
     }
   }
 
@@ -139,7 +186,64 @@ export default function Hero() {
             <div className="relative z-10 h-full flex flex-col justify-center p-4 lg:p-6">
               {expandedPanel === panel.id ? (
                 <div className="h-full flex flex-col justify-center items-center">
-                  <div className="w-full max-w-4xl">{panel.content}</div>
+                  <div className="w-full max-w-4xl">
+                    {panel.id === 'events' ? (
+                      <div className="space-y-6">
+                        <div className="text-center mb-6">
+                          <h1 className="text-4xl lg:text-5xl font-bold text-white mb-3">
+                            This Week Events
+                          </h1>
+                          <p className="text-white text-lg mb-4 max-w-2xl">
+                            Don't miss what is happening at Mary Frank this week.
+                          </p>
+                        </div>
+                        
+                        {loading ? (
+                          <div className="text-center">
+                            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+                            <p className="text-white mt-2">Loading events...</p>
+                          </div>
+                        ) : events.length > 0 ? (
+                          <div className="space-y-4">
+                            {events.map((event) => (
+                              <div key={event.id} className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
+                                <div className="flex items-start justify-between">
+                                  <div className="flex-1">
+                                    <h3 className="text-white font-semibold text-lg mb-1">{event.title}</h3>
+                                    {event.location && (
+                                      <p className="text-white/80 text-sm mb-2">
+                                        📍 {event.location}
+                                      </p>
+                                    )}
+                                    <div className="flex items-center space-x-4 text-white/90 text-sm">
+                                      <span>{formatEventDate(event.start)}</span>
+                                      <span>•</span>
+                                      <span>{formatEventTime(event.start)}</span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="text-center">
+                            <p className="text-white/80 text-lg">No upcoming events this week</p>
+                          </div>
+                        )}
+                        
+                        <div className="text-center mt-6">
+                          <a
+                            href="/events"
+                            className="inline-flex items-center border-2 border-white bg-transparent text-white px-6 py-3 rounded-lg font-semibold hover:bg-white hover:text-teal-600 transition-all duration-300"
+                          >
+                            VIEW FULL CALENDAR
+                          </a>
+                        </div>
+                      </div>
+                    ) : (
+                      panel.content
+                    )}
+                  </div>
                 </div>
               ) : (
                 <div className="text-center text-white h-full flex flex-col justify-center items-center">
