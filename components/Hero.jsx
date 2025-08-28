@@ -113,10 +113,7 @@ export default function Hero() {
 
   return (
     <>
-      <section
-        className="relative w-full overflow-hidden"
-        style={{ height: '70vh' }}
-      >
+      <section className="relative w-full overflow-hidden h-auto md:h-[70vh]">
         <div className="flex flex-col md:flex-row h-full">
           {heroPanels.map((panel) => (
             <div
