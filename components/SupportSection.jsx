@@ -4,16 +4,6 @@ export default function SupportSection() {
   return (
     <section className="pt-8 md:pt-16 pb-16 bg-gradient-to-br from-slate-50 to-green-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-slate-800 mb-4">
-            Support Our Teachers
-          </h2>
-          <p className="text-lg text-slate-600 max-w-3xl mx-auto leading-relaxed">
-            Help provide essential classroom supplies and materials that our
-            teachers need to create engaging learning experiences.
-          </p>
-        </div>
-
         <div className="grid md:grid-cols-2 gap-12 lg:gap-16">
           {/* Donate Items Card */}
           <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-8 border border-slate-100">
@@ -109,13 +99,6 @@ export default function SupportSection() {
               </Link>
             </div>
           </div>
-        </div>
-
-        <div className="text-center mt-12">
-          <p className="text-slate-500 italic text-lg">
-            Together we can provide teachers with the resources they need to
-            inspire our students.
-          </p>
         </div>
       </div>
     </section>
