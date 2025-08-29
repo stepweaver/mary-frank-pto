@@ -2,7 +2,11 @@
 
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
-import { MapPinIcon } from '@heroicons/react/24/outline'
+import {
+  MapPinIcon,
+  ClockIcon,
+  UserGroupIcon,
+} from '@heroicons/react/24/outline'
 
 const heroPanels = [
   {
@@ -106,11 +110,16 @@ const heroPanels = [
 export default function Hero() {
   const [expandedPanel, setExpandedPanel] = useState('pto-branding')
   const [events, setEvents] = useState([])
+  const [volunteerOpportunities, setVolunteerOpportunities] = useState([])
   const [loading, setLoading] = useState(false)
+  const [volunteerLoading, setVolunteerLoading] = useState(false)
 
   useEffect(() => {
     if (expandedPanel === 'events') {
       fetchEvents()
+    }
+    if (expandedPanel === 'volunteer') {
+      fetchVolunteerOpportunities()
     }
   }, [expandedPanel])
 
@@ -126,6 +135,21 @@ export default function Hero() {
       console.error('Error fetching events:', error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const fetchVolunteerOpportunities = async () => {
+    setVolunteerLoading(true)
+    try {
+      const response = await fetch('/api/contentful/volunteer')
+      const data = await response.json()
+      if (data.success) {
+        setVolunteerOpportunities(data.data)
+      }
+    } catch (error) {
+      console.error('Error fetching volunteer opportunities:', error)
+    } finally {
+      setVolunteerLoading(false)
     }
   }
 
@@ -198,6 +222,31 @@ export default function Hero() {
         </span>
       )
     }
+  }
+
+  const formatVolunteerDate = (dateString) => {
+    if (!dateString) return 'Flexible'
+    const date = new Date(dateString)
+    const today = new Date()
+    const tomorrow = new Date(today)
+    tomorrow.setDate(tomorrow.getDate() + 1)
+
+    if (date.toDateString() === today.toDateString()) {
+      return 'Today'
+    } else if (date.toDateString() === tomorrow.toDateString()) {
+      return 'Tomorrow'
+    } else {
+      return date.toLocaleDateString('en-US', {
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
+      })
+    }
+  }
+
+  const handleVolunteerClick = (opportunity) => {
+    // TODO: Open modal with signup form
+    console.log('Volunteer opportunity clicked:', opportunity)
   }
 
   return (
@@ -446,6 +495,109 @@ export default function Hero() {
                             className="inline-flex items-center border-2 border-white bg-transparent text-white px-6 py-3 rounded-lg font-semibold hover:bg-white hover:text-teal-600 transition-all duration-300"
                           >
                             VIEW FULL CALENDAR
+                          </a>
+                        </div>
+                      </div>
+                    ) : panel.id === 'volunteer' ? (
+                      <div className="space-y-4">
+                        <div className="mb-4">
+                          <h1 className="text-4xl lg:text-5xl font-bold text-white mb-2">
+                            Volunteer Opportunities
+                          </h1>
+                          <p className="text-white text-lg max-w-2xl">
+                            Your help is needed right now. Join our community of
+                            volunteers.
+                          </p>
+                        </div>
+
+                        {volunteerLoading ? (
+                          <div>
+                            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+                            <p className="text-white mt-2">
+                              Loading opportunities...
+                            </p>
+                          </div>
+                        ) : volunteerOpportunities.length > 0 ? (
+                          <div className="max-w-4xl">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                              {volunteerOpportunities
+                                .slice(0, 6)
+                                .map((opportunity) => (
+                                  <div
+                                    key={opportunity.id}
+                                    className="bg-white/15 backdrop-blur-sm rounded-lg p-4 border border-white/20 cursor-pointer hover:bg-white/20 transition-all duration-200"
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      handleVolunteerClick(opportunity)
+                                    }}
+                                  >
+                                    <div className="mb-3">
+                                      <h3 className="text-white font-semibold text-sm leading-tight">
+                                        {opportunity.title}
+                                      </h3>
+                                    </div>
+
+                                    {opportunity.description && (
+                                      <div className="text-white/90 text-xs mb-3 leading-relaxed line-clamp-2">
+                                        {opportunity.description}
+                                      </div>
+                                    )}
+
+                                    <div className="space-y-2">
+                                      {opportunity.date && (
+                                        <div className="flex items-center text-white/80 text-xs">
+                                          <ClockIcon className="h-3 w-3 mr-2 text-green-200" />
+                                          <span>
+                                            {formatVolunteerDate(
+                                              opportunity.date
+                                            )}
+                                          </span>
+                                          {opportunity.time && (
+                                            <span className="ml-1">
+                                              • {opportunity.time}
+                                            </span>
+                                          )}
+                                        </div>
+                                      )}
+
+                                      {opportunity.location && (
+                                        <div className="flex items-center text-white/80 text-xs">
+                                          <MapPinIcon className="h-3 w-3 mr-2 text-green-200" />
+                                          <span>{opportunity.location}</span>
+                                        </div>
+                                      )}
+
+                                      <div className="flex items-center text-white/80 text-xs">
+                                        <UserGroupIcon className="h-3 w-3 mr-2 text-green-200" />
+                                        <span>
+                                          {opportunity.spots} spots available
+                                        </span>
+                                      </div>
+                                    </div>
+
+                                    <div className="mt-3 pt-3 border-t border-white/20">
+                                      <button className="w-full bg-white/20 hover:bg-white/30 text-white text-xs font-medium py-2 px-3 rounded transition-colors duration-200">
+                                        Sign Up
+                                      </button>
+                                    </div>
+                                  </div>
+                                ))}
+                            </div>
+                          </div>
+                        ) : (
+                          <div>
+                            <p className="text-white/80 text-lg">
+                              No volunteer opportunities available at the moment
+                            </p>
+                          </div>
+                        )}
+
+                        <div className="mt-4">
+                          <a
+                            href="/volunteer"
+                            className="inline-flex items-center border-2 border-white bg-transparent text-white px-6 py-3 rounded-lg font-semibold hover:bg-white hover:text-emerald-600 transition-all duration-300"
+                          >
+                            VIEW ALL OPPORTUNITIES
                           </a>
                         </div>
                       </div>

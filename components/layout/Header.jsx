@@ -31,8 +31,8 @@ export default function Header() {
             <Image
               src="/logo-with-glow.png"
               alt="Mary Frank PTO Logo"
-              width={40}
-              height={40}
+              width={48}
+              height={48}
               className="h-12 w-auto rounded-lg"
             />
             <span className="text-xl font-bold text-gray-900">
