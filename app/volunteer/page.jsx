@@ -17,6 +17,8 @@ export default function Volunteer() {
   const [selectedOpportunity, setSelectedOpportunity] = useState(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
+  const [showError, setShowError] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('')
 
   useEffect(() => {
     fetchVolunteerOpportunities()
@@ -89,6 +91,10 @@ export default function Volunteer() {
         setIsModalOpen(false)
         setSelectedOpportunity(null)
         setShowSuccess(true)
+
+        // Refresh the opportunities list to show updated spots count
+        await fetchVolunteerOpportunities()
+
         // Hide success message after 5 seconds
         setTimeout(() => setShowSuccess(false), 5000)
       } else {
@@ -96,7 +102,12 @@ export default function Volunteer() {
       }
     } catch (error) {
       console.error('Error submitting signup:', error)
-      alert('There was an error submitting your signup. Please try again.')
+      setErrorMessage(
+        'There was an error submitting your signup. Please try again.'
+      )
+      setShowError(true)
+      // Hide error message after 5 seconds
+      setTimeout(() => setShowError(false), 5000)
     } finally {
       setIsSubmitting(false)
     }
@@ -140,6 +151,32 @@ export default function Volunteer() {
               <div className="ml-3">
                 <p className="text-sm font-medium text-green-800">
                   Thank you for signing up! We'll be in touch soon.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Error Message */}
+        {showError && (
+          <div className="mb-8 bg-red-50 border border-red-200 rounded-lg p-4">
+            <div className="flex items-center justify-center">
+              <div className="flex-shrink-0">
+                <svg
+                  className="h-5 w-5 text-red-400"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <p className="text-sm font-medium text-red-800">
+                  {errorMessage}
                 </p>
               </div>
             </div>
@@ -201,8 +238,20 @@ export default function Volunteer() {
                   </div>
 
                   <div className="mt-4 pt-3 border-t border-gray-200">
-                    <button className="w-full bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200">
-                      Sign Up Now
+                    <button
+                      className={`w-full font-medium py-2 px-4 rounded-lg transition-colors duration-200 ${
+                        opportunity.spots > 0
+                          ? 'bg-green-500 hover:bg-green-600 text-white cursor-pointer'
+                          : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                      }`}
+                      onClick={() => handleVolunteerClick(opportunity)}
+                      disabled={opportunity.spots <= 0 || isSubmitting}
+                    >
+                      {opportunity.spots > 0
+                        ? isSubmitting
+                          ? 'Signing Up...'
+                          : 'Sign Up Now'
+                        : 'No Spots Available'}
                     </button>
                   </div>
                 </div>

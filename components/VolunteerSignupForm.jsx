@@ -117,7 +117,7 @@ export default function VolunteerSignupForm({
               required
               value={formData.firstName}
               onChange={handleChange}
-              className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 placeholder-gray-500 ${
+              className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 placeholder-gray-500 text-gray-900 ${
                 errors.firstName ? 'border-red-300' : 'border-gray-300'
               }`}
               placeholder="First name"
@@ -144,7 +144,7 @@ export default function VolunteerSignupForm({
               required
               value={formData.lastName}
               onChange={handleChange}
-              className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 placeholder-gray-500 ${
+              className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 placeholder-gray-500 text-gray-900 ${
                 errors.lastName ? 'border-red-300' : 'border-gray-300'
               }`}
               placeholder="Last name"
@@ -172,7 +172,7 @@ export default function VolunteerSignupForm({
             required
             value={formData.email}
             onChange={handleChange}
-            className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 placeholder-gray-500 ${
+            className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 placeholder-gray-500 text-gray-900 ${
               errors.email ? 'border-red-300' : 'border-gray-300'
             }`}
             placeholder="your@email.com"
@@ -198,7 +198,7 @@ export default function VolunteerSignupForm({
             name="phone"
             value={formData.phone}
             onChange={handleChange}
-            className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 placeholder-gray-500 ${
+            className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 placeholder-gray-500 text-gray-900 ${
               errors.phone ? 'border-red-300' : 'border-gray-300'
             }`}
             placeholder="(555) 123-4567"
@@ -222,7 +222,7 @@ export default function VolunteerSignupForm({
           rows="3"
           value={formData.notes}
           onChange={handleChange}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 placeholder-gray-500"
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 placeholder-gray-500 text-gray-900"
           placeholder="Any special skills, availability, or questions..."
         />
       </div>

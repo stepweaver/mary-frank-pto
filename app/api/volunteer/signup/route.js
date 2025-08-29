@@ -200,7 +200,6 @@ function generateVolunteerEmail({
 
         <p><strong>What happens next?</strong></p>
         <ul>
-          <li>You will receive a reminder email 24 hours before the event</li>
           <li>Please arrive 10 minutes early to check in</li>
           <li>If you need to cancel, please contact us as soon as possible</li>
         </ul>
