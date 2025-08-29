@@ -627,11 +627,7 @@ export default function Hero() {
                                 .map((opportunity) => (
                                   <div
                                     key={opportunity.id}
-                                    className="bg-white/15 backdrop-blur-sm rounded-lg p-3 border border-white/20 cursor-pointer hover:bg-white/20 transition-all duration-200"
-                                    onClick={(e) => {
-                                      e.stopPropagation()
-                                      handleVolunteerClick(opportunity)
-                                    }}
+                                    className="bg-white/15 backdrop-blur-sm rounded-lg p-3 border border-white/20 hover:bg-white/20 transition-all duration-200"
                                   >
                                     <div className="mb-2">
                                       <h3 className="text-white font-semibold text-sm leading-tight">
@@ -678,7 +674,13 @@ export default function Hero() {
                                     </div>
 
                                     <div className="mt-2 pt-2 border-t border-white/20">
-                                      <button className="w-full bg-white/20 hover:bg-white/30 text-white text-xs font-medium py-1.5 px-3 rounded transition-colors duration-200">
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation()
+                                          handleVolunteerClick(opportunity)
+                                        }}
+                                        className="w-full bg-white/20 hover:bg-white/30 text-white text-xs font-medium py-1.5 px-3 rounded transition-colors duration-200 cursor-pointer"
+                                      >
                                         Sign Up
                                       </button>
                                     </div>
