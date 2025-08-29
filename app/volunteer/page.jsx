@@ -74,27 +74,27 @@ export default function Volunteer() {
             <p className="text-gray-600 mt-4">Loading opportunities...</p>
           </div>
         ) : opportunities.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {opportunities.map((opportunity) => (
               <div
                 key={opportunity.id}
                 className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow duration-200 cursor-pointer"
                 onClick={() => handleVolunteerClick(opportunity)}
               >
-                <div className="p-6">
-                  <div className="mb-4">
-                    <h3 className="text-lg font-semibold text-gray-900 leading-tight">
+                <div className="p-4">
+                  <div className="mb-2">
+                    <h3 className="text-base font-semibold text-gray-900 leading-tight">
                       {opportunity.title}
                     </h3>
                   </div>
 
                   {opportunity.description && (
-                    <div className="text-gray-600 text-sm mb-4 leading-relaxed">
+                    <div className="text-gray-600 text-sm mb-3 leading-relaxed">
                       {opportunity.description}
                     </div>
                   )}
 
-                  <div className="space-y-3">
+                  <div className="space-y-2">
                     {opportunity.date && (
                       <div className="flex items-center text-gray-700 text-sm">
                         <ClockIcon className="h-4 w-4 mr-2 text-green-500" />
@@ -122,8 +122,8 @@ export default function Volunteer() {
                     </div>
                   </div>
 
-                  <div className="mt-6 pt-4 border-t border-gray-200">
-                    <button className="w-full bg-green-500 hover:bg-green-600 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200">
+                  <div className="mt-4 pt-3 border-t border-gray-200">
+                    <button className="w-full bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200">
                       Sign Up Now
                     </button>
                   </div>

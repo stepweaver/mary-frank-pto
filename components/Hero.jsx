@@ -296,7 +296,7 @@ export default function Hero() {
                           </div>
                         ) : events.length > 0 ? (
                           <div className="max-w-4xl">
-                            <div className="grid grid-cols-3 gap-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                               {/* This Week */}
                               <div className="space-y-3">
                                 <h3 className="text-white font-semibold text-base text-center mb-3">
@@ -454,7 +454,7 @@ export default function Hero() {
                                         </div>
                                       )}
                                       {event.location && (
-                                        <div className="flex items-center text-white text-xs mb-1">
+                                        <div className="flex items-center text-white text-white/90 text-xs mb-1">
                                           <MapPinIcon className="h-3 w-3 mr-1 text-green-200" />
                                           <span>{event.location}</span>
                                         </div>
@@ -525,25 +525,25 @@ export default function Hero() {
                                 .map((opportunity) => (
                                   <div
                                     key={opportunity.id}
-                                    className="bg-white/15 backdrop-blur-sm rounded-lg p-4 border border-white/20 cursor-pointer hover:bg-white/20 transition-all duration-200"
+                                    className="bg-white/15 backdrop-blur-sm rounded-lg p-3 border border-white/20 cursor-pointer hover:bg-white/20 transition-all duration-200"
                                     onClick={(e) => {
                                       e.stopPropagation()
                                       handleVolunteerClick(opportunity)
                                     }}
                                   >
-                                    <div className="mb-3">
+                                    <div className="mb-2">
                                       <h3 className="text-white font-semibold text-sm leading-tight">
                                         {opportunity.title}
                                       </h3>
                                     </div>
 
                                     {opportunity.description && (
-                                      <div className="text-white/90 text-xs mb-3 leading-relaxed line-clamp-2">
+                                      <div className="text-white/90 text-xs mb-2 leading-relaxed line-clamp-2">
                                         {opportunity.description}
                                       </div>
                                     )}
 
-                                    <div className="space-y-2">
+                                    <div className="space-y-1.5">
                                       {opportunity.date && (
                                         <div className="flex items-center text-white/80 text-xs">
                                           <ClockIcon className="h-3 w-3 mr-2 text-green-200" />
@@ -575,8 +575,8 @@ export default function Hero() {
                                       </div>
                                     </div>
 
-                                    <div className="mt-3 pt-3 border-t border-white/20">
-                                      <button className="w-full bg-white/20 hover:bg-white/30 text-white text-xs font-medium py-2 px-3 rounded transition-colors duration-200">
+                                    <div className="mt-2 pt-2 border-t border-white/20">
+                                      <button className="w-full bg-white/20 hover:bg-white/30 text-white text-xs font-medium py-1.5 px-3 rounded transition-colors duration-200">
                                         Sign Up
                                       </button>
                                     </div>
