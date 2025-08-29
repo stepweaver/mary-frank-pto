@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
+import Modal from '@/components/ui/Modal'
+import VolunteerSignupForm from '@/components/VolunteerSignupForm'
 import {
   MapPinIcon,
   ClockIcon,
@@ -117,6 +119,9 @@ export default function Hero() {
   const [loading, setLoading] = useState(false)
   const [volunteerLoading, setVolunteerLoading] = useState(false)
   const [newsLoading, setNewsLoading] = useState(false)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [selectedOpportunity, setSelectedOpportunity] = useState(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   useEffect(() => {
     if (expandedPanel === 'events') {
@@ -297,8 +302,53 @@ export default function Hero() {
   }
 
   const handleVolunteerClick = (opportunity) => {
-    // TODO: Open modal with signup form
-    console.log('Volunteer opportunity clicked:', opportunity)
+    setSelectedOpportunity(opportunity)
+    setIsModalOpen(true)
+  }
+
+  const handleSignupSubmit = async (formData) => {
+    setIsSubmitting(true)
+    try {
+      const response = await fetch('/api/volunteer/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          opportunityId: selectedOpportunity.id,
+          opportunityTitle: selectedOpportunity.title,
+          name: `${formData.firstName} ${formData.lastName}`,
+          email: formData.email,
+          phone: formData.phone,
+          message: formData.notes,
+          opportunityDate: selectedOpportunity.date,
+          opportunityTime: selectedOpportunity.time,
+          opportunityLocation: selectedOpportunity.location,
+        }),
+      })
+
+      const result = await response.json()
+
+      if (result.success) {
+        // Close modal and show success message
+        setIsModalOpen(false)
+        setSelectedOpportunity(null)
+        // You could add a toast notification here
+        alert("Thank you for signing up! We'll be in touch soon.")
+      } else {
+        throw new Error(result.message || 'Signup failed')
+      }
+    } catch (error) {
+      console.error('Error submitting signup:', error)
+      alert('There was an error submitting your signup. Please try again.')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false)
+    setSelectedOpportunity(null)
   }
 
   return (
@@ -750,6 +800,22 @@ export default function Hero() {
           </div>
         ))}
       </div>
+
+      {/* Volunteer Signup Modal */}
+      <Modal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        title="Sign Up to Volunteer"
+      >
+        {selectedOpportunity && (
+          <VolunteerSignupForm
+            opportunity={selectedOpportunity}
+            onSubmit={handleSignupSubmit}
+            onCancel={handleCloseModal}
+            isSubmitting={isSubmitting}
+          />
+        )}
+      </Modal>
     </section>
   )
 }

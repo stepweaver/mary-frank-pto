@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import Container from '@/components/layout/Container'
+import Modal from '@/components/ui/Modal'
+import VolunteerSignupForm from '@/components/VolunteerSignupForm'
 import {
   MapPinIcon,
   ClockIcon,
@@ -11,6 +13,10 @@ import {
 export default function Volunteer() {
   const [opportunities, setOpportunities] = useState([])
   const [loading, setLoading] = useState(true)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [selectedOpportunity, setSelectedOpportunity] = useState(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [showSuccess, setShowSuccess] = useState(false)
 
   useEffect(() => {
     fetchVolunteerOpportunities()
@@ -51,8 +57,54 @@ export default function Volunteer() {
   }
 
   const handleVolunteerClick = (opportunity) => {
-    // TODO: Open modal with signup form
-    console.log('Volunteer opportunity clicked:', opportunity)
+    setSelectedOpportunity(opportunity)
+    setIsModalOpen(true)
+  }
+
+  const handleSignupSubmit = async (formData) => {
+    setIsSubmitting(true)
+    try {
+      const response = await fetch('/api/volunteer/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          opportunityId: selectedOpportunity.id,
+          opportunityTitle: selectedOpportunity.title,
+          name: `${formData.firstName} ${formData.lastName}`,
+          email: formData.email,
+          phone: formData.phone,
+          message: formData.notes,
+          opportunityDate: selectedOpportunity.date,
+          opportunityTime: selectedOpportunity.time,
+          opportunityLocation: selectedOpportunity.location,
+        }),
+      })
+
+      const result = await response.json()
+
+      if (result.success) {
+        // Close modal and show success message
+        setIsModalOpen(false)
+        setSelectedOpportunity(null)
+        setShowSuccess(true)
+        // Hide success message after 5 seconds
+        setTimeout(() => setShowSuccess(false), 5000)
+      } else {
+        throw new Error(result.message || 'Signup failed')
+      }
+    } catch (error) {
+      console.error('Error submitting signup:', error)
+      alert('There was an error submitting your signup. Please try again.')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false)
+    setSelectedOpportunity(null)
   }
 
   return (
@@ -67,6 +119,32 @@ export default function Volunteer() {
             time and skills are valuable to our community.
           </p>
         </div>
+
+        {/* Success Message */}
+        {showSuccess && (
+          <div className="mb-8 bg-green-50 border border-green-200 rounded-lg p-4">
+            <div className="flex items-center justify-center">
+              <div className="flex-shrink-0">
+                <svg
+                  className="h-5 w-5 text-green-400"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <p className="text-sm font-medium text-green-800">
+                  Thank you for signing up! We'll be in touch soon.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {loading ? (
           <div className="text-center py-12">
@@ -146,6 +224,22 @@ export default function Volunteer() {
           </div>
         )}
       </div>
+
+      {/* Volunteer Signup Modal */}
+      <Modal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        title="Sign Up to Volunteer"
+      >
+        {selectedOpportunity && (
+          <VolunteerSignupForm
+            opportunity={selectedOpportunity}
+            onSubmit={handleSignupSubmit}
+            onCancel={handleCloseModal}
+            isSubmitting={isSubmitting}
+          />
+        )}
+      </Modal>
     </Container>
   )
 }
