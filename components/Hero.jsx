@@ -6,6 +6,8 @@ import {
   MapPinIcon,
   ClockIcon,
   UserGroupIcon,
+  NewspaperIcon,
+  CalendarIcon,
 } from '@heroicons/react/24/outline'
 
 const heroPanels = [
@@ -111,8 +113,10 @@ export default function Hero() {
   const [expandedPanel, setExpandedPanel] = useState('pto-branding')
   const [events, setEvents] = useState([])
   const [volunteerOpportunities, setVolunteerOpportunities] = useState([])
+  const [newsArticles, setNewsArticles] = useState([])
   const [loading, setLoading] = useState(false)
   const [volunteerLoading, setVolunteerLoading] = useState(false)
+  const [newsLoading, setNewsLoading] = useState(false)
 
   useEffect(() => {
     if (expandedPanel === 'events') {
@@ -120,6 +124,9 @@ export default function Hero() {
     }
     if (expandedPanel === 'volunteer') {
       fetchVolunteerOpportunities()
+    }
+    if (expandedPanel === 'news') {
+      fetchNewsArticles()
     }
   }, [expandedPanel])
 
@@ -150,6 +157,21 @@ export default function Hero() {
       console.error('Error fetching volunteer opportunities:', error)
     } finally {
       setVolunteerLoading(false)
+    }
+  }
+
+  const fetchNewsArticles = async () => {
+    setNewsLoading(true)
+    try {
+      const response = await fetch('/api/contentful/news')
+      const data = await response.json()
+      if (data.success) {
+        setNewsArticles(data.data)
+      }
+    } catch (error) {
+      console.error('Error fetching news:', error)
+    } finally {
+      setNewsLoading(false)
     }
   }
 
@@ -242,6 +264,36 @@ export default function Hero() {
         day: 'numeric',
       })
     }
+  }
+
+  const formatNewsDate = (dateString) => {
+    if (!dateString) return 'Recently'
+    const date = new Date(dateString)
+    const today = new Date()
+    const yesterday = new Date(today)
+    yesterday.setDate(yesterday.getDate() - 1)
+
+    if (date.toDateString() === today.toDateString()) {
+      return 'Today'
+    } else if (date.toDateString() === yesterday.toDateString()) {
+      return 'Yesterday'
+    } else {
+      return date.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+      })
+    }
+  }
+
+  const getCategoryColor = (category) => {
+    const colors = {
+      'teacher-support': 'bg-blue-500',
+      fundraising: 'bg-green-500',
+      events: 'bg-purple-500',
+      community: 'bg-orange-500',
+      default: 'bg-gray-500',
+    }
+    return colors[category] || colors.default
   }
 
   const handleVolunteerClick = (opportunity) => {
@@ -598,6 +650,82 @@ export default function Hero() {
                             className="inline-flex items-center border-2 border-white bg-transparent text-white px-6 py-3 rounded-lg font-semibold hover:bg-white hover:text-emerald-600 transition-all duration-300"
                           >
                             VIEW ALL OPPORTUNITIES
+                          </a>
+                        </div>
+                      </div>
+                    ) : panel.id === 'news' ? (
+                      <div className="space-y-4">
+                        <div className="mb-4">
+                          <h1 className="text-4xl lg:text-5xl font-bold text-white mb-2">
+                            Latest News & Updates
+                          </h1>
+                          <p className="text-white text-lg max-w-2xl">
+                            Stay connected with our community and learn about
+                            the latest achievements.
+                          </p>
+                        </div>
+
+                        {newsLoading ? (
+                          <div>
+                            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+                            <p className="text-white mt-2">Loading news...</p>
+                          </div>
+                        ) : newsArticles.length > 0 ? (
+                          <div className="max-w-4xl">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+                              {newsArticles.slice(0, 6).map((article) => (
+                                <div
+                                  key={article.id}
+                                  className="bg-white/15 backdrop-blur-sm rounded-lg overflow-hidden border border-white/20 hover:bg-white/20 transition-all duration-200 cursor-pointer"
+                                  onClick={() =>
+                                    window.open(
+                                      `/news/${article.slug}`,
+                                      '_blank'
+                                    )
+                                  }
+                                >
+                                  {article.featuredImage && (
+                                    <div className="relative h-32 w-full">
+                                      <Image
+                                        src={article.featuredImage}
+                                        alt={article.imageAlt || article.title}
+                                        fill
+                                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                                        className="object-cover"
+                                      />
+                                      <div className="absolute inset-0 bg-black/20" />
+                                    </div>
+                                  )}
+
+                                  <div className="p-4">
+                                    <h3 className="text-white font-semibold text-sm leading-tight mb-2 line-clamp-2">
+                                      {article.title}
+                                    </h3>
+
+                                    {article.excerpt && (
+                                      <div className="text-white/90 text-xs mb-2 leading-relaxed line-clamp-3">
+                                        {article.excerpt}
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        ) : (
+                          <div>
+                            <p className="text-white/80 text-lg">
+                              No news articles available at the moment
+                            </p>
+                          </div>
+                        )}
+
+                        <div className="mt-4">
+                          <a
+                            href="/news"
+                            className="inline-flex items-center border-2 border-white bg-transparent text-white px-6 py-3 rounded-lg font-semibold hover:bg-white hover:text-green-600 transition-all duration-300"
+                          >
+                            VIEW ALL NEWS
                           </a>
                         </div>
                       </div>

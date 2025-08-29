@@ -28,13 +28,14 @@ export default function Header() {
         <div className="flex items-center justify-between h-16">
           {/* Logo and Brand */}
           <Link href="/" className="flex items-center space-x-3">
-            <Image
-              src="/logo-with-glow.png"
-              alt="Mary Frank PTO Logo"
-              width={48}
-              height={48}
-              className="h-12 w-auto rounded-lg"
-            />
+            <div className="h-12 w-12 relative">
+              <Image
+                src="/logo-with-glow.png"
+                alt="Mary Frank PTO Logo"
+                fill
+                className="object-contain rounded-lg"
+              />
+            </div>
             <span className="text-xl font-bold text-gray-900">
               Mary Frank Elementary PTO
             </span>
