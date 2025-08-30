@@ -1,6 +1,7 @@
 import { google } from "googleapis";
 import { Resend } from "resend";
 import { createClient as createManagementClient } from "contentful-management";
+import { rateLimit } from "@/lib/rateLimit";
 
 // Check if we have the required environment variables
 const hasGoogleSheets =
@@ -35,6 +36,24 @@ if (hasResend) {
 
 export async function POST(request) {
   try {
+    // Rate limiting - 5 requests per minute per IP
+    const clientIP = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
+    if (!rateLimit(clientIP, 5, 60000)) {
+      return Response.json(
+        { success: false, error: "Too many requests. Please try again later." },
+        { status: 429 }
+      );
+    }
+
+    // Check content length (max 10KB)
+    const contentLength = request.headers.get('content-length');
+    if (contentLength && parseInt(contentLength) > 10240) {
+      return Response.json(
+        { success: false, error: "Request too large" },
+        { status: 413 }
+      );
+    }
+
     const {
       name,
       email,
@@ -47,10 +66,30 @@ export async function POST(request) {
       opportunityLocation,
     } = await request.json();
 
+    // Sanitize and validate input
+    const sanitizedName = name?.toString().trim().substring(0, 100);
+    const sanitizedEmail = email?.toString().trim().toLowerCase().substring(0, 254);
+    const sanitizedPhone = phone?.toString().trim().substring(0, 20);
+    const sanitizedMessage = message?.toString().trim().substring(0, 1000);
+    const sanitizedOpportunityId = opportunityId?.toString().trim();
+    const sanitizedOpportunityTitle = opportunityTitle?.toString().trim().substring(0, 200);
+    const sanitizedOpportunityDate = opportunityDate?.toString().trim().substring(0, 50);
+    const sanitizedOpportunityTime = opportunityTime?.toString().trim().substring(0, 50);
+    const sanitizedOpportunityLocation = opportunityLocation?.toString().trim().substring(0, 200);
+
     // Validate required fields
-    if (!name || !email || !opportunityId) {
+    if (!sanitizedName || !sanitizedEmail || !sanitizedOpportunityId) {
       return Response.json(
         { success: false, error: "Missing required fields" },
+        { status: 400 }
+      );
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(sanitizedEmail)) {
+      return Response.json(
+        { success: false, error: "Invalid email format" },
         { status: 400 }
       );
     }
@@ -65,15 +104,15 @@ export async function POST(request) {
         const timestamp = new Date().toISOString();
         const rowData = [
           timestamp,
-          opportunityId,
-          opportunityTitle,
-          name,
-          email,
-          phone || "",
-          message || "",
-          opportunityDate || "",
-          opportunityTime || "",
-          opportunityLocation || "",
+          sanitizedOpportunityId,
+          sanitizedOpportunityTitle,
+          sanitizedName,
+          sanitizedEmail,
+          sanitizedPhone || "",
+          sanitizedMessage || "",
+          sanitizedOpportunityDate || "",
+          sanitizedOpportunityTime || "",
+          sanitizedOpportunityLocation || "",
           "pending", // status
         ];
 
@@ -87,7 +126,9 @@ export async function POST(request) {
           },
         });
       } catch (sheetsError) {
-        console.error("Google Sheets error:", sheetsError);
+        if (process.env.NODE_ENV === 'development') {
+          console.error("Google Sheets error:", sheetsError);
+        }
       }
     }
 
@@ -96,19 +137,21 @@ export async function POST(request) {
       try {
         volunteerEmailResponse = await resend.emails.send({
           from: "Mary Frank PTO <noreply@stepweaver.dev>",
-          to: email,
-          subject: `Volunteer Signup Confirmation - ${opportunityTitle}`,
+          to: sanitizedEmail,
+          subject: `Volunteer Signup Confirmation - ${sanitizedOpportunityTitle}`,
           html: generateVolunteerEmail({
-            name,
-            opportunityTitle,
-            opportunityDate,
-            opportunityTime,
-            opportunityLocation,
-            opportunityId,
+            name: sanitizedName,
+            opportunityTitle: sanitizedOpportunityTitle,
+            opportunityDate: sanitizedOpportunityDate,
+            opportunityTime: sanitizedOpportunityTime,
+            opportunityLocation: sanitizedOpportunityLocation,
+            opportunityId: sanitizedOpportunityId,
           }),
         });
       } catch (emailError) {
-        console.error("Resend email error:", emailError);
+        if (process.env.NODE_ENV === 'development') {
+          console.error("Resend email error:", emailError);
+        }
       }
     }
 
@@ -121,7 +164,7 @@ export async function POST(request) {
         const environment = await space.getEnvironment(process.env.CONTENTFUL_ENVIRONMENT || 'master');
 
         // Get the current entry
-        const entry = await environment.getEntry(opportunityId);
+        const entry = await environment.getEntry(sanitizedOpportunityId);
 
         // Handle Contentful locale structure - spots field is { 'en-US': number }
         const currentSpots = entry.fields.spots?.['en-US'] || 0;
@@ -146,7 +189,9 @@ export async function POST(request) {
         }
       }
     } catch (contentfulError) {
-      console.error("Contentful update error:", contentfulError);
+      if (process.env.NODE_ENV === 'development') {
+        console.error("Contentful update error:", contentfulError);
+      }
     }
 
     // Send notification email to PTO if Resend is available
@@ -154,22 +199,24 @@ export async function POST(request) {
       try {
         ptoEmailResponse = await resend.emails.send({
           from: "Mary Frank PTO <noreply@stepweaver.dev>",
-          to: process.env.PTO_EMAIL || "stephen@stepweaver.dev",
-          subject: `New Volunteer Signup: ${opportunityTitle}`,
+          to: process.env.PTO_EMAIL || "pto@maryfrankpto.org",
+          subject: `New Volunteer Signup: ${sanitizedOpportunityTitle}`,
           html: generatePTOEmail({
-            name,
-            email,
-            phone,
-            message,
-            opportunityTitle,
-            opportunityDate,
-            opportunityTime,
-            opportunityLocation,
-            opportunityId,
+            name: sanitizedName,
+            email: sanitizedEmail,
+            phone: sanitizedPhone,
+            message: sanitizedMessage,
+            opportunityTitle: sanitizedOpportunityTitle,
+            opportunityDate: sanitizedOpportunityDate,
+            opportunityTime: sanitizedOpportunityTime,
+            opportunityLocation: sanitizedOpportunityLocation,
+            opportunityId: sanitizedOpportunityId,
           }),
         });
       } catch (emailError) {
-        console.error("PTO email error:", emailError);
+        if (process.env.NODE_ENV === 'development') {
+          console.error("PTO email error:", emailError);
+        }
       }
     }
 
@@ -189,7 +236,9 @@ export async function POST(request) {
       },
     });
   } catch (error) {
-    console.error("Error processing volunteer signup:", error);
+    if (process.env.NODE_ENV === 'development') {
+      console.error("Error processing volunteer signup:", error);
+    }
     return Response.json(
       { success: false, error: "Failed to process signup" },
       { status: 500 }

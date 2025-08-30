@@ -81,7 +81,7 @@ export default function Footer() {
               </h3>
               <div className="space-y-3">
                 <div className="text-base text-gray-200">
-                  <p className="font-medium text-white">President: [Name]</p>
+                  <p className="font-medium text-white">President: Lynn Yoder</p>
                   <p className="font-medium text-white">
                     Vice President: [Name]
                   </p>
