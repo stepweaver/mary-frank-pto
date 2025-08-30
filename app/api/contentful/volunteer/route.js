@@ -1,29 +1,26 @@
-import { createClient } from "contentful";
-
-const client = createClient({
-  space: process.env.CONTENTFUL_SPACE_ID,
-  accessToken: process.env.CONTENTFUL_ACCESS_TOKEN,
-});
+import deliveryClient from "@/lib/contentful";
 
 export async function GET() {
   try {
-    const response = await client.getEntries({
+    const response = await deliveryClient.getEntries({
       content_type: "volunteerOpportunity",
       order: ["-sys.createdAt"],
       limit: 10,
     });
 
-    const opportunities = response.items.map((item) => ({
-      id: item.sys.id,
-      title: item.fields.title,
-      description: item.fields.description,
-      spots: item.fields.spots || 0,
-      date: item.fields.date,
-      time: item.fields.time,
-      location: item.fields.location,
-      googleFormUrl: item.fields.googleFormUrl,
-      image: item.fields.image,
-    }));
+    const opportunities = response.items
+      .map((item) => ({
+        id: item.sys.id,
+        title: item.fields.title,
+        description: item.fields.description,
+        spots: item.fields.spots || 0,
+        date: item.fields.date,
+        time: item.fields.time,
+        location: item.fields.location,
+        googleFormUrl: item.fields.googleFormUrl,
+        image: item.fields.image,
+      }))
+      .filter((opportunity) => opportunity.spots > 0); // Only show opportunities with spots > 0
 
     return Response.json(
       {

@@ -13,28 +13,42 @@ import {
 export default function Volunteer() {
   const [opportunities, setOpportunities] = useState([])
   const [loading, setLoading] = useState(true)
+  const [refreshing, setRefreshing] = useState(false)
+  const [lastUpdated, setLastUpdated] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedOpportunity, setSelectedOpportunity] = useState(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [showSuccess, setShowSuccess] = useState(false)
   const [showError, setShowError] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
 
   useEffect(() => {
     fetchVolunteerOpportunities()
+
+    // Set up automatic refresh every 30 seconds to keep spots count current
+    const interval = setInterval(() => fetchVolunteerOpportunities(true), 30000)
+
+    // Cleanup interval on component unmount
+    return () => clearInterval(interval)
   }, [])
 
-  const fetchVolunteerOpportunities = async () => {
+  const fetchVolunteerOpportunities = async (isBackgroundRefresh = false) => {
     try {
+      if (isBackgroundRefresh) {
+        setRefreshing(true)
+      }
       const response = await fetch('/api/contentful/volunteer')
       const data = await response.json()
       if (data.success) {
         setOpportunities(data.data)
+        setLastUpdated(new Date())
       }
     } catch (error) {
       console.error('Error fetching volunteer opportunities:', error)
     } finally {
       setLoading(false)
+      if (isBackgroundRefresh) {
+        setRefreshing(false)
+      }
     }
   }
 
@@ -59,6 +73,8 @@ export default function Volunteer() {
   }
 
   const handleVolunteerClick = (opportunity) => {
+    // Refresh opportunities to get the most current spots count before opening modal
+    fetchVolunteerOpportunities(true)
     setSelectedOpportunity(opportunity)
     setIsModalOpen(true)
   }
@@ -87,16 +103,12 @@ export default function Volunteer() {
       const result = await response.json()
 
       if (result.success) {
-        // Close modal and show success message
+        // Close modal and refresh opportunities
         setIsModalOpen(false)
         setSelectedOpportunity(null)
-        setShowSuccess(true)
 
         // Refresh the opportunities list to show updated spots count
-        await fetchVolunteerOpportunities()
-
-        // Hide success message after 5 seconds
-        setTimeout(() => setShowSuccess(false), 5000)
+        await fetchVolunteerOpportunities(true)
       } else {
         throw new Error(result.message || 'Signup failed')
       }
@@ -116,46 +128,68 @@ export default function Volunteer() {
   const handleCloseModal = () => {
     setIsModalOpen(false)
     setSelectedOpportunity(null)
+    // Refresh opportunities when modal is closed to show any updates
+    fetchVolunteerOpportunities(true)
   }
 
   return (
     <Container className="py-12">
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Volunteer Opportunities
-          </h1>
-          <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <h1 className="text-4xl font-bold text-gray-900">
+              Volunteer Opportunities
+            </h1>
+            {refreshing && (
+              <div className="flex items-center gap-2 text-sm text-gray-500">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-green-500"></div>
+                <span>Updating...</span>
+              </div>
+            )}
+          </div>
+          <p className="text-lg text-gray-600 max-w-3xl mx-auto mb-4">
             Find opportunities to help and make a difference in our school. Your
             time and skills are valuable to our community.
           </p>
-        </div>
-
-        {/* Success Message */}
-        {showSuccess && (
-          <div className="mb-8 bg-green-50 border border-green-200 rounded-lg p-4">
-            <div className="flex items-center justify-center">
-              <div className="flex-shrink-0">
+          <button
+            onClick={() => {
+              if (!refreshing) {
+                fetchVolunteerOpportunities(true)
+              }
+            }}
+            disabled={refreshing}
+            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-green-700 bg-green-100 border border-green-300 rounded-lg hover:bg-green-200 hover:border-green-400 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {refreshing ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-green-600"></div>
+                Updating...
+              </>
+            ) : (
+              <>
                 <svg
-                  className="h-5 w-5 text-green-400"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
+                  className="h-4 w-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
                 >
                   <path
-                    fillRule="evenodd"
-                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                    clipRule="evenodd"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
                   />
                 </svg>
-              </div>
-              <div className="ml-3">
-                <p className="text-sm font-medium text-green-800">
-                  Thank you for signing up! We'll be in touch soon.
-                </p>
-              </div>
+                Refresh Opportunities
+              </>
+            )}
+          </button>
+          {lastUpdated && (
+            <div className="text-xs text-gray-500 mt-2">
+              Last updated: {lastUpdated.toLocaleTimeString()}
             </div>
-          </div>
-        )}
+          )}
+        </div>
 
         {/* Error Message */}
         {showError && (

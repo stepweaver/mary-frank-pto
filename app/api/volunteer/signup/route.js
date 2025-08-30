@@ -1,10 +1,18 @@
 import { google } from "googleapis";
 import { Resend } from "resend";
+import { createClient as createManagementClient } from "contentful-management";
 
 // Check if we have the required environment variables
 const hasGoogleSheets =
   process.env.GOOGLE_SHEETS_ID && process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
 const hasResend = process.env.RESEND_API_KEY;
+
+// Initialize Contentful management client
+const managementClient = process.env.CONTENTFUL_MANAGEMENT_TOKEN
+  ? createManagementClient({
+    accessToken: process.env.CONTENTFUL_MANAGEMENT_TOKEN,
+  })
+  : null;
 
 // Initialize Google Sheets API using service account
 let sheets = null;
@@ -104,6 +112,43 @@ export async function POST(request) {
       }
     }
 
+    // Update spots in Contentful
+    let contentfulResponse = null;
+    try {
+      if (managementClient) {
+        // Get the space and environment
+        const space = await managementClient.getSpace(process.env.CONTENTFUL_SPACE_ID);
+        const environment = await space.getEnvironment(process.env.CONTENTFUL_ENVIRONMENT || 'master');
+
+        // Get the current entry
+        const entry = await environment.getEntry(opportunityId);
+
+        // Handle Contentful locale structure - spots field is { 'en-US': number }
+        const currentSpots = entry.fields.spots?.['en-US'] || 0;
+
+        if (currentSpots > 0) {
+          // Update the spots count
+          const updatedSpots = Math.max(0, currentSpots - 1);
+
+          // Update with proper locale structure
+          entry.fields.spots = { 'en-US': updatedSpots };
+
+          // Update and publish
+          const updatedEntry = await entry.update();
+          const publishedEntry = await updatedEntry.publish();
+
+          contentfulResponse = {
+            success: true,
+            id: publishedEntry.sys.id,
+            spots: publishedEntry.fields.spots,
+            updatedAt: publishedEntry.sys.updatedAt,
+          };
+        }
+      }
+    } catch (contentfulError) {
+      console.error("Contentful update error:", contentfulError);
+    }
+
     // Send notification email to PTO if Resend is available
     if (resend && hasResend) {
       try {
@@ -135,9 +180,11 @@ export async function POST(request) {
       data: {
         googleSheets: hasGoogleSheets ? "enabled" : "disabled",
         resend: hasResend ? "enabled" : "disabled",
+        contentful: contentfulResponse ? "updated" : "failed",
         volunteerEmailId: volunteerEmailResponse?.data?.id || null,
         ptoEmailId: ptoEmailResponse?.data?.id || null,
         sheetRow: sheetResponse?.data?.updates?.updatedRange || null,
+        contentfulUpdate: contentfulResponse || null,
         testMode: !hasGoogleSheets || !hasResend,
       },
     });

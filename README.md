@@ -9,6 +9,32 @@ This guide will walk you through setting up the Mary Frank PTO website from scra
 - A code editor (VS Code recommended)
 - Basic knowledge of React, Next.js, and Tailwind CSS
 
+## Environment Variables
+
+Create a `.env.local` file in the root directory with the following variables:
+
+```bash
+# Contentful Configuration
+CONTENTFUL_SPACE_ID=your_space_id
+CONTENTFUL_ACCESS_TOKEN=your_delivery_token
+CONTENTFUL_MANAGEMENT_TOKEN=your_management_token
+CONTENTFUL_ENVIRONMENT=master
+
+# Google Sheets (optional)
+GOOGLE_SHEETS_ID=your_spreadsheet_id
+GOOGLE_SERVICE_ACCOUNT_EMAIL=your_service_account_email
+GOOGLE_PRIVATE_KEY=your_private_key
+
+# Resend Email (optional)
+RESEND_API_KEY=your_resend_api_key
+PTO_EMAIL=pto@maryfrankpto.org
+
+# Base URL for development
+NEXT_PUBLIC_BASE_URL=http://localhost:3000
+```
+
+**Important**: The `CONTENTFUL_MANAGEMENT_TOKEN` is required for updating volunteer opportunity spots. This token has write permissions to your Contentful space.
+
 ## Project Overview
 
 We're building a PTO website with:
