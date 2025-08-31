@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 import Modal from '@/components/ui/Modal'
 import VolunteerSignupForm from '@/components/VolunteerSignupForm'
 import {
@@ -726,41 +727,40 @@ export default function Hero() {
                           <div className="max-w-4xl">
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                               {newsArticles.slice(0, 6).map((article) => (
-                                <div
+                                <Link
                                   key={article.id}
-                                  className="bg-white/15 backdrop-blur-sm rounded-lg overflow-hidden border border-white/20 hover:bg-white/20 transition-all duration-200 cursor-pointer"
-                                  onClick={() =>
-                                    window.open(
-                                      `/news/${article.slug}`,
-                                      '_blank'
-                                    )
-                                  }
+                                  href={`/news/${article.slug}`}
+                                  className="block bg-white/15 backdrop-blur-sm rounded-lg overflow-hidden border border-white/20 hover:bg-white/20 transition-all duration-200"
                                 >
-                                  {article.featuredImage && (
-                                    <div className="relative h-32 w-full">
-                                      <Image
-                                        src={article.featuredImage}
-                                        alt={article.imageAlt || article.title}
-                                        fill
-                                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                                        className="object-cover"
-                                      />
-                                      <div className="absolute inset-0 bg-black/20" />
-                                    </div>
-                                  )}
-
-                                  <div className="p-4">
-                                    <h3 className="text-white font-semibold text-sm leading-tight mb-2 line-clamp-2">
-                                      {article.title}
-                                    </h3>
-
-                                    {article.excerpt && (
-                                      <div className="text-white/90 text-xs mb-2 leading-relaxed line-clamp-3">
-                                        {article.excerpt}
+                                  <div>
+                                    {article.featuredImage && (
+                                      <div className="relative h-32 w-full">
+                                        <Image
+                                          src={article.featuredImage}
+                                          alt={
+                                            article.imageAlt || article.title
+                                          }
+                                          fill
+                                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                                          className="object-cover"
+                                        />
+                                        <div className="absolute inset-0 bg-black/20" />
                                       </div>
                                     )}
+
+                                    <div className="p-4">
+                                      <h3 className="text-white font-semibold text-sm leading-tight mb-2 line-clamp-2">
+                                        {article.title}
+                                      </h3>
+
+                                      {article.excerpt && (
+                                        <div className="text-white/90 text-xs mb-2 leading-relaxed line-clamp-3">
+                                          {article.excerpt}
+                                        </div>
+                                      )}
+                                    </div>
                                   </div>
-                                </div>
+                                </Link>
                               ))}
                             </div>
                           </div>

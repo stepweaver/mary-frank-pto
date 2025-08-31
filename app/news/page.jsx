@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 import Container from '@/components/layout/Container'
 import { CalendarIcon, NewspaperIcon } from '@heroicons/react/24/outline'
 
@@ -79,35 +80,37 @@ export default function News() {
         ) : newsArticles.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {newsArticles.map((article) => (
-              <article
+              <Link
                 key={article.id}
-                className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer border border-gray-100"
-                onClick={() => window.open(`/news/${article.slug}`, '_blank')}
+                href={`/news/${article.slug}`}
+                className="block bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 border border-gray-100"
               >
-                {article.featuredImage && (
-                  <div className="relative h-48 w-full">
-                    <Image
-                      src={article.featuredImage}
-                      alt={article.imageAlt || article.title}
-                      fill
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                      className="object-cover"
-                    />
-                  </div>
-                )}
-
-                <div className="p-6">
-                  <h2 className="text-xl font-bold text-gray-900 mb-3 line-clamp-2 leading-tight">
-                    {article.title}
-                  </h2>
-
-                  {article.excerpt && (
-                    <p className="text-gray-600 text-sm leading-relaxed line-clamp-3">
-                      {article.excerpt}
-                    </p>
+                <article>
+                  {article.featuredImage && (
+                    <div className="relative h-48 w-full">
+                      <Image
+                        src={article.featuredImage}
+                        alt={article.imageAlt || article.title}
+                        fill
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        className="object-cover"
+                      />
+                    </div>
                   )}
-                </div>
-              </article>
+
+                  <div className="p-6">
+                    <h2 className="text-xl font-bold text-gray-900 mb-3 line-clamp-2 leading-tight">
+                      {article.title}
+                    </h2>
+
+                    {article.excerpt && (
+                      <p className="text-gray-600 text-sm leading-relaxed line-clamp-3">
+                        {article.excerpt}
+                      </p>
+                    )}
+                  </div>
+                </article>
+              </Link>
             ))}
           </div>
         ) : (

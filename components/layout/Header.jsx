@@ -32,8 +32,10 @@ export default function Header() {
               <Image
                 src="/logo-with-glow.png"
                 alt="Mary Frank PTO Logo"
-                fill
+                width={64}
+                height={64}
                 className="object-contain rounded-lg"
+                style={{ width: '100%', height: '100%' }}
               />
             </div>
             <span className="text-2xl font-bold text-gray-900">
