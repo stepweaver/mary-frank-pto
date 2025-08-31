@@ -1,4 +1,5 @@
 import Container from '@/components/layout/Container'
+import Image from 'next/image'
 import {
   MapPinIcon,
   PhoneIcon,
@@ -19,20 +20,78 @@ import {
 export default function About() {
   return (
     <div className="min-h-screen">
-      <Container className="py-12">
-        <div className="max-w-6xl mx-auto">
-          {/* Hero Section */}
-          <div className="text-center mb-16">
-            <h1 className="text-5xl lg:text-6xl font-bold text-text-primary mb-6">
-              About Mary Frank PTO
-            </h1>
-            <p className="text-xl text-text-secondary max-w-3xl mx-auto leading-relaxed">
-              We are a dedicated group of parents, teachers, and staff working
-              together to enhance the educational experience at Mary Frank
-              Elementary School.
-            </p>
+      {/* Enhanced Hero Section with Logo Background */}
+      <div className="relative bg-gradient-to-br from-primary-50 via-white to-primary-100 overflow-hidden">
+        {/* Background Logo */}
+        <div className="absolute inset-0 flex items-center justify-center opacity-30">
+          <div className="relative w-[400px] h-[400px]">
+            <Image
+              src="/logo-with-glow.png"
+              alt="Mary Frank PTO Logo"
+              fill
+              className="object-contain"
+              priority
+            />
           </div>
+        </div>
 
+        {/* Background Pattern */}
+        <div className="absolute inset-0 opacity-5">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary-100/20 via-transparent to-primary-50/20"></div>
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage: `radial-gradient(circle at 25% 25%, #00b140 1px, transparent 1px)`,
+              backgroundSize: '60px 60px',
+            }}
+          ></div>
+        </div>
+
+        <Container className="relative z-10 py-20">
+          <div className="max-w-6xl mx-auto text-center">
+            {/* Main Hero Content */}
+            <div className="mb-8">
+              <h1 className="text-6xl lg:text-7xl font-bold text-text-primary mb-8 leading-tight">
+                About Mary Frank PTO
+              </h1>
+              <p className="text-2xl text-text-secondary max-w-4xl mx-auto leading-relaxed font-medium">
+                We are a dedicated group of parents, teachers, and staff working
+                together to enhance the educational experience at Mary Frank
+                Elementary School.
+              </p>
+            </div>
+
+            {/* Hero Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+              <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-primary-200 shadow-lg">
+                <div className="text-4xl font-bold text-primary-600 mb-2">
+                  489
+                </div>
+                <div className="text-text-secondary font-medium">Students</div>
+              </div>
+              <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-primary-200 shadow-lg">
+                <div className="text-4xl font-bold text-primary-600 mb-2">
+                  A
+                </div>
+                <div className="text-text-secondary font-medium">
+                  State Rating
+                </div>
+              </div>
+              <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-primary-200 shadow-lg">
+                <div className="text-4xl font-bold text-primary-600 mb-2">
+                  1958
+                </div>
+                <div className="text-text-secondary font-medium">
+                  Established
+                </div>
+              </div>
+            </div>
+          </div>
+        </Container>
+      </div>
+
+      <Container className="py-16">
+        <div className="max-w-6xl mx-auto">
           {/* Mission Statement */}
           <div className="bg-gradient-to-r from-primary-50 to-primary-100 rounded-2xl p-8 mb-16 border border-primary-200">
             <div className="text-center">
