@@ -245,12 +245,8 @@ export default function Events() {
     if (navigator.clipboard && window.isSecureContext) {
       navigator.clipboard
         .writeText(text)
-        .then(() => {
-          // Optional: Show a success message
-          console.log('Copied to clipboard')
-        })
+        .then(() => {})
         .catch((err) => {
-          console.error('Failed to copy: ', err)
           fallbackCopyTextToClipboard(text)
         })
     } else {
@@ -269,7 +265,6 @@ export default function Events() {
     textArea.select()
     try {
       document.execCommand('copy')
-      console.log('Copied to clipboard')
     } catch (err) {
       console.error('Fallback: Oops, unable to copy', err)
     }
@@ -296,9 +291,6 @@ export default function Events() {
     icon: getEventTypeInfo(getEventType(event)).icon,
     featured: false, // You can add logic to determine featured events
   }))
-
-  console.log('Raw events:', events)
-  console.log('Transformed events:', transformedEvents)
 
   // Filter featured events (you can customize this logic)
   const featuredEvents = transformedEvents.filter((event) => event.featured)
@@ -488,12 +480,6 @@ export default function Events() {
                       const firstDayOfMonth = new Date(year, month, 1).getDay()
                       const calendarGrid = []
 
-                      console.log('Calendar generation:', {
-                        month,
-                        year,
-                        currentDate: currentDate.toISOString(),
-                      })
-
                       // Add empty cells for days before the first day of the month
                       for (let i = 0; i < firstDayOfMonth; i++) {
                         calendarGrid.push(
@@ -517,19 +503,6 @@ export default function Events() {
 
                           // Check if the current day falls within the event's date range
                           const currentDayDate = new Date(year, month, day)
-
-                          if (day === 1) {
-                            console.log('Day 1 filtering:', {
-                              day,
-                              month,
-                              year,
-                              currentDayDate: currentDayDate.toISOString(),
-                              allEventsCount: allEvents.length,
-                              eventStartDate: eventStartDate.toISOString(),
-                              eventEndDate: eventEndDate.toISOString(),
-                              eventTitle: event.title,
-                            })
-                          }
 
                           // More robust date comparison - compare dates without time
                           const currentDayStart = new Date(
@@ -585,17 +558,11 @@ export default function Events() {
                                     <div className="font-medium text-primary-900 mb-1 line-clamp-2">
                                       {event.title}
                                     </div>
-                                    <div className="text-primary-700 space-y-1">
+                                    <div className="text-primary-700">
                                       <div className="flex items-center space-x-1">
                                         <ClockIcon className="w-3 h-3 flex-shrink-0" />
                                         <span className="truncate">
                                           {event.time}
-                                        </span>
-                                      </div>
-                                      <div className="flex items-center space-x-1">
-                                        <MapPinIcon className="w-3 h-3 flex-shrink-0" />
-                                        <span className="truncate">
-                                          {event.location}
                                         </span>
                                       </div>
                                     </div>
@@ -688,12 +655,6 @@ export default function Events() {
                     const daysInMonth = new Date(year, month + 1, 0).getDate()
                     const mobileCalendar = []
 
-                    console.log('Mobile calendar generation:', {
-                      month,
-                      year,
-                      currentDate: currentDate.toISOString(),
-                    })
-
                     for (let day = 1; day <= daysInMonth; day++) {
                       const date = new Date(year, month, day)
                       const isToday =
@@ -706,19 +667,6 @@ export default function Events() {
 
                         // Check if the current day falls within the event's date range
                         const currentDayDate = new Date(year, month, day)
-
-                        if (day === 1) {
-                          console.log('Mobile Day 1 filtering:', {
-                            day,
-                            month,
-                            year,
-                            currentDayDate: currentDayDate.toISOString(),
-                            allEventsCount: allEvents.length,
-                            eventStartDate: eventStartDate.toISOString(),
-                            eventEndDate: eventEndDate.toISOString(),
-                            eventTitle: event.title,
-                          })
-                        }
 
                         // More robust date comparison - compare dates without time
                         const currentDayStart = new Date(
@@ -790,10 +738,6 @@ export default function Events() {
                                     <span className="flex items-center space-x-1">
                                       <ClockIcon className="w-3 h-3" />
                                       <span>{event.time}</span>
-                                    </span>
-                                    <span className="flex items-center space-x-1">
-                                      <MapPinIcon className="w-3 h-3" />
-                                      <span>{event.location}</span>
                                     </span>
                                   </div>
                                   <div className="flex items-center justify-between">
