@@ -139,7 +139,7 @@ export default function Hero() {
   const fetchEvents = async () => {
     setLoading(true)
     try {
-      const response = await fetch('/api/events?maxResults=3')
+      const response = await fetch('/api/events?maxResults=20')
       const data = await response.json()
 
       if (data.success) {
@@ -406,6 +406,73 @@ export default function Hero() {
                           </div>
                         ) : events.length > 0 ? (
                           <div className="max-w-4xl">
+                            {/* Debug info - remove this after testing */}
+                            <div className="mb-4 p-2 bg-white/10 rounded text-xs text-white/80">
+                              <div>Total events: {events.length}</div>
+                              <div>
+                                Today: {new Date().toLocaleDateString()}
+                              </div>
+                              <div>
+                                This week events:{' '}
+                                {
+                                  events.filter((event) => {
+                                    const eventDate = new Date(event.start)
+                                    const today = new Date()
+                                    today.setHours(0, 0, 0, 0)
+                                    const weekFromNow = new Date(today)
+                                    weekFromNow.setDate(
+                                      weekFromNow.getDate() + 7
+                                    )
+                                    weekFromNow.setHours(23, 59, 59, 999)
+                                    return (
+                                      eventDate >= today &&
+                                      eventDate <= weekFromNow
+                                    )
+                                  }).length
+                                }
+                              </div>
+                              <div>
+                                Next week events:{' '}
+                                {
+                                  events.filter((event) => {
+                                    const eventDate = new Date(event.start)
+                                    const today = new Date()
+                                    today.setHours(0, 0, 0, 0)
+                                    const weekFromNow = new Date(today)
+                                    weekFromNow.setDate(
+                                      weekFromNow.getDate() + 7
+                                    )
+                                    weekFromNow.setHours(23, 59, 59, 999)
+                                    const twoWeeksFromNow = new Date(today)
+                                    twoWeeksFromNow.setDate(
+                                      twoWeeksFromNow.getDate() + 14
+                                    )
+                                    twoWeeksFromNow.setHours(23, 59, 59, 999)
+                                    return (
+                                      eventDate > weekFromNow &&
+                                      eventDate <= twoWeeksFromNow
+                                    )
+                                  }).length
+                                }
+                              </div>
+                              <div>
+                                Upcoming events:{' '}
+                                {
+                                  events.filter((event) => {
+                                    const eventDate = new Date(event.start)
+                                    const today = new Date()
+                                    today.setHours(0, 0, 0, 0)
+                                    const twoWeeksFromNow = new Date(today)
+                                    twoWeeksFromNow.setDate(
+                                      twoWeeksFromNow.getDate() + 14
+                                    )
+                                    twoWeeksFromNow.setHours(23, 59, 59, 999)
+                                    return eventDate > twoWeeksFromNow
+                                  }).length
+                                }
+                              </div>
+                            </div>
+
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                               {/* This Week */}
                               <div className="space-y-3">
