@@ -12,9 +12,13 @@ const calendar = google.calendar({ version: "v3", auth });
 
 export async function GET(request) {
   try {
+    const { searchParams } = new URL(request.url);
+    const maxResults = parseInt(searchParams.get("maxResults")) || 5;
+    const calendarId = searchParams.get("calendarId") || process.env.GOOGLE_CALENDAR_ID;
+
     // Check if required environment variables are set
-    if (!process.env.GOOGLE_CALENDAR_ID) {
-      console.error("Missing GOOGLE_CALENDAR_ID environment variable");
+    if (!calendarId) {
+      console.error("Missing calendar ID");
       return Response.json({
         success: false,
         error: "Calendar configuration missing",
@@ -29,11 +33,8 @@ export async function GET(request) {
       }, { status: 500 });
     }
 
-    const { searchParams } = new URL(request.url);
-    const maxResults = parseInt(searchParams.get("maxResults")) || 5;
-
     const response = await calendar.events.list({
-      calendarId: process.env.GOOGLE_CALENDAR_ID,
+      calendarId: calendarId,
       timeMin: new Date().toISOString(),
       maxResults: maxResults,
       singleEvents: true,

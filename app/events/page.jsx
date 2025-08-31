@@ -116,6 +116,9 @@ export default function Events() {
   const [events, setEvents] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [selectedEvent, setSelectedEvent] = useState(null)
+  const [showEventModal, setShowEventModal] = useState(false)
+  const [currentDate, setCurrentDate] = useState(new Date())
 
   useEffect(() => {
     fetchEvents()
@@ -141,11 +144,149 @@ export default function Events() {
     }
   }
 
+  const handleEventClick = (event) => {
+    setSelectedEvent(event)
+    setShowEventModal(true)
+  }
+
+  const closeEventModal = () => {
+    setShowEventModal(false)
+    setSelectedEvent(null)
+  }
+
+  const goToPreviousMonth = () => {
+    setCurrentDate(
+      new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1)
+    )
+  }
+
+  const goToNextMonth = () => {
+    setCurrentDate(
+      new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1)
+    )
+  }
+
+  const goToCurrentMonth = () => {
+    setCurrentDate(new Date())
+  }
+
+  const openGoogleCalendar = (event) => {
+    const startDate = new Date(event.date)
+    const endDate = new Date(startDate.getTime() + 60 * 60 * 1000) // 1 hour later
+
+    const formatDateForGoogle = (date) => {
+      return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z'
+    }
+
+    const googleCalendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(event.title)}&dates=${formatDateForGoogle(startDate)}/${formatDateForGoogle(endDate)}&details=${encodeURIComponent(event.description || '')}&location=${encodeURIComponent(event.location)}`
+
+    const newWindow = window.open(googleCalendarUrl, '_blank')
+    if (newWindow) {
+      newWindow.focus()
+    } else {
+      copyToClipboard(googleCalendarUrl)
+    }
+  }
+
+  const openOutlookCalendar = (event) => {
+    const startDate = new Date(event.date)
+    const endDate = new Date(startDate.getTime() + 60 * 60 * 1000) // 1 hour later
+
+    const formatDateForOutlook = (date) => {
+      return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z'
+    }
+
+    const outlookUrl = `https://outlook.live.com/calendar/0/deeplink/compose?subject=${encodeURIComponent(event.title)}&startdt=${formatDateForOutlook(startDate)}&enddt=${formatDateForOutlook(endDate)}&body=${encodeURIComponent(event.description || '')}&location=${encodeURIComponent(event.location)}`
+
+    const newWindow = window.open(outlookUrl, '_blank')
+    if (newWindow) {
+      newWindow.focus()
+    } else {
+      copyToClipboard(outlookUrl)
+    }
+  }
+
+  const downloadICSFile = (event) => {
+    const startDate = new Date(event.date)
+    const endDate = new Date(startDate.getTime() + 60 * 60 * 1000) // 1 hour later
+
+    const formatDateForICS = (date) => {
+      return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z'
+    }
+
+    const icsContent = [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'PRODID:-//Mary Frank PTO//Event Calendar//EN',
+      'BEGIN:VEVENT',
+      `UID:${event.id}@maryfrankpto.org`,
+      `DTSTAMP:${formatDateForICS(new Date())}`,
+      `DTSTART:${formatDateForICS(startDate)}`,
+      `DTEND:${formatDateForICS(endDate)}`,
+      `SUMMARY:${event.title}`,
+      `DESCRIPTION:${event.description || ''}`,
+      `LOCATION:${event.location}`,
+      'END:VEVENT',
+      'END:VCALENDAR',
+    ].join('\r\n')
+
+    const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' })
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `${event.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.ics`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    window.URL.revokeObjectURL(url)
+  }
+
+  const copyToClipboard = (text) => {
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard
+        .writeText(text)
+        .then(() => {
+          // Optional: Show a success message
+          console.log('Copied to clipboard')
+        })
+        .catch((err) => {
+          console.error('Failed to copy: ', err)
+          fallbackCopyTextToClipboard(text)
+        })
+    } else {
+      fallbackCopyTextToClipboard(text)
+    }
+  }
+
+  const fallbackCopyTextToClipboard = (text) => {
+    const textArea = document.createElement('textarea')
+    textArea.value = text
+    textArea.style.position = 'fixed'
+    textArea.style.left = '-999999px'
+    textArea.style.top = '-999999px'
+    document.body.appendChild(textArea)
+    textArea.focus()
+    textArea.select()
+    try {
+      document.execCommand('copy')
+      console.log('Copied to clipboard')
+    } catch (err) {
+      console.error('Fallback: Oops, unable to copy', err)
+    }
+    document.body.removeChild(textArea)
+  }
+
+  const copyEventDetails = (event) => {
+    const eventDetails = `${event.title}\nDate: ${formatDate(event.date)}\nTime: ${event.time}\nLocation: ${event.location}${event.description ? `\n\n${event.description}` : ''}`
+    copyToClipboard(eventDetails)
+  }
+
   // Transform Google Calendar events to match the original structure
   const transformedEvents = events.map((event) => ({
     id: event.id,
     title: event.title,
     date: event.start,
+    end: event.end, // Add end date for multi-day events
     time: event.end
       ? `${formatTime(event.start)} - ${formatTime(event.end)}`
       : formatTime(event.start),
@@ -155,6 +296,9 @@ export default function Events() {
     icon: getEventTypeInfo(getEventType(event)).icon,
     featured: false, // You can add logic to determine featured events
   }))
+
+  console.log('Raw events:', events)
+  console.log('Transformed events:', transformedEvents)
 
   // Filter featured events (you can customize this logic)
   const featuredEvents = transformedEvents.filter((event) => event.featured)
@@ -265,12 +409,58 @@ export default function Events() {
 
                 {/* Calendar Header */}
                 <div className="bg-primary-50 px-6 py-4 border-b border-gray-200 relative z-10">
-                  <h2 className="text-3xl font-bold text-text-primary text-center">
-                    {new Date().toLocaleDateString('en-US', {
-                      month: 'long',
-                      year: 'numeric',
-                    })}
-                  </h2>
+                  <div className="flex items-center justify-between">
+                    <button
+                      onClick={goToPreviousMonth}
+                      className="p-2 text-primary-600 hover:bg-primary-100 rounded-lg transition-colors"
+                    >
+                      <svg
+                        className="w-6 h-6"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M15 19l-7-7 7-7"
+                        />
+                      </svg>
+                    </button>
+                    <h2 className="text-3xl font-bold text-text-primary text-center">
+                      {currentDate.toLocaleDateString('en-US', {
+                        month: 'long',
+                        year: 'numeric',
+                      })}
+                    </h2>
+                    <button
+                      onClick={goToNextMonth}
+                      className="p-2 text-primary-600 hover:bg-primary-100 rounded-lg transition-colors"
+                    >
+                      <svg
+                        className="w-6 h-6"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 5l7 7-7 7"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                  <div className="text-center mt-2">
+                    <button
+                      onClick={goToCurrentMonth}
+                      className="text-sm text-primary-600 hover:text-primary-800 underline cursor-pointer"
+                    >
+                      Today
+                    </button>
+                  </div>
                 </div>
 
                 {/* Calendar Grid */}
@@ -292,11 +482,17 @@ export default function Events() {
                   {/* Calendar Days */}
                   <div className="grid grid-cols-7 gap-0">
                     {(() => {
-                      const month = new Date().getMonth()
-                      const year = new Date().getFullYear()
+                      const month = currentDate.getMonth()
+                      const year = currentDate.getFullYear()
                       const daysInMonth = new Date(year, month + 1, 0).getDate()
                       const firstDayOfMonth = new Date(year, month, 1).getDay()
                       const calendarGrid = []
+
+                      console.log('Calendar generation:', {
+                        month,
+                        year,
+                        currentDate: currentDate.toISOString(),
+                      })
 
                       // Add empty cells for days before the first day of the month
                       for (let i = 0; i < firstDayOfMonth; i++) {
@@ -313,9 +509,51 @@ export default function Events() {
                         const date = new Date(year, month, day)
                         const isToday =
                           date.toDateString() === new Date().toDateString()
-                        const dayEvents = allEvents.filter(
-                          (event) => new Date(event.date).getDate() === day
-                        )
+                        const dayEvents = allEvents.filter((event) => {
+                          const eventStartDate = new Date(event.date)
+                          const eventEndDate = event.end
+                            ? new Date(event.end)
+                            : eventStartDate
+
+                          // Check if the current day falls within the event's date range
+                          const currentDayDate = new Date(year, month, day)
+
+                          if (day === 1) {
+                            console.log('Day 1 filtering:', {
+                              day,
+                              month,
+                              year,
+                              currentDayDate: currentDayDate.toISOString(),
+                              allEventsCount: allEvents.length,
+                              eventStartDate: eventStartDate.toISOString(),
+                              eventEndDate: eventEndDate.toISOString(),
+                              eventTitle: event.title,
+                            })
+                          }
+
+                          // More robust date comparison - compare dates without time
+                          const currentDayStart = new Date(
+                            year,
+                            month,
+                            day,
+                            0,
+                            0,
+                            0
+                          )
+                          const currentDayEnd = new Date(
+                            year,
+                            month,
+                            day,
+                            23,
+                            59,
+                            59
+                          )
+
+                          return (
+                            eventStartDate <= currentDayEnd &&
+                            eventEndDate >= currentDayStart
+                          )
+                        })
 
                         calendarGrid.push(
                           <div
@@ -334,12 +572,6 @@ export default function Events() {
                                 >
                                   {day}
                                 </span>
-                                {dayEvents.length > 0 && (
-                                  <span className="text-xs text-primary-600 font-medium">
-                                    {dayEvents.length} event
-                                    {dayEvents.length !== 1 ? 's' : ''}
-                                  </span>
-                                )}
                               </div>
 
                               {/* Events Container */}
@@ -348,6 +580,7 @@ export default function Events() {
                                   <div
                                     key={`event-${index}`}
                                     className="bg-primary-50 border border-primary-200 rounded-lg p-2 text-xs hover:bg-primary-100 transition-colors cursor-pointer"
+                                    onClick={() => handleEventClick(event)}
                                   >
                                     <div className="font-medium text-primary-900 mb-1 line-clamp-2">
                                       {event.title}
@@ -393,29 +626,123 @@ export default function Events() {
 
                 {/* Calendar Header */}
                 <div className="bg-primary-50 px-4 py-3 border-b border-gray-200">
-                  <h3 className="text-lg font-semibold text-primary-900 text-center">
-                    {new Date().toLocaleDateString('en-US', {
-                      month: 'long',
-                      year: 'numeric',
-                    })}
-                  </h3>
+                  <div className="flex items-center justify-between">
+                    <button
+                      onClick={goToPreviousMonth}
+                      className="p-2 text-primary-600 hover:bg-primary-100 rounded-lg transition-colors"
+                    >
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M15 19l-7-7 7-7"
+                        />
+                      </svg>
+                    </button>
+                    <h3 className="text-lg font-semibold text-primary-900 text-center">
+                      {currentDate.toLocaleDateString('en-US', {
+                        month: 'long',
+                        year: 'numeric',
+                      })}
+                    </h3>
+                    <button
+                      onClick={goToNextMonth}
+                      className="p-2 text-primary-600 hover:bg-primary-100 rounded-lg transition-colors"
+                    >
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 5l7 7-7 7"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                  <div className="text-center mt-2">
+                    <button
+                      onClick={goToCurrentMonth}
+                      className="text-sm text-primary-600 hover:text-primary-800 underline cursor-pointer"
+                    >
+                      Today
+                    </button>
+                  </div>
                 </div>
 
                 {/* Mobile Calendar Days List */}
                 <div className="divide-y divide-gray-200">
                   {(() => {
-                    const month = new Date().getMonth()
-                    const year = new Date().getFullYear()
+                    const month = currentDate.getMonth()
+                    const year = currentDate.getFullYear()
                     const daysInMonth = new Date(year, month + 1, 0).getDate()
                     const mobileCalendar = []
+
+                    console.log('Mobile calendar generation:', {
+                      month,
+                      year,
+                      currentDate: currentDate.toISOString(),
+                    })
 
                     for (let day = 1; day <= daysInMonth; day++) {
                       const date = new Date(year, month, day)
                       const isToday =
                         date.toDateString() === new Date().toDateString()
-                      const dayEvents = allEvents.filter(
-                        (event) => new Date(event.date).getDate() === day
-                      )
+                      const dayEvents = allEvents.filter((event) => {
+                        const eventStartDate = new Date(event.date)
+                        const eventEndDate = event.end
+                          ? new Date(event.end)
+                          : eventStartDate
+
+                        // Check if the current day falls within the event's date range
+                        const currentDayDate = new Date(year, month, day)
+
+                        if (day === 1) {
+                          console.log('Mobile Day 1 filtering:', {
+                            day,
+                            month,
+                            year,
+                            currentDayDate: currentDayDate.toISOString(),
+                            allEventsCount: allEvents.length,
+                            eventStartDate: eventStartDate.toISOString(),
+                            eventEndDate: eventEndDate.toISOString(),
+                            eventTitle: event.title,
+                          })
+                        }
+
+                        // More robust date comparison - compare dates without time
+                        const currentDayStart = new Date(
+                          year,
+                          month,
+                          day,
+                          0,
+                          0,
+                          0
+                        )
+                        const currentDayEnd = new Date(
+                          year,
+                          month,
+                          day,
+                          23,
+                          59,
+                          59
+                        )
+
+                        return (
+                          eventStartDate <= currentDayEnd &&
+                          eventEndDate >= currentDayStart
+                        )
+                      })
                       const dayName = new Date(
                         year,
                         month,
@@ -478,7 +805,10 @@ export default function Events() {
                                         {getEventTypeInfo(event.type).label}
                                       </span>
                                     </div>
-                                    <button className="text-xs bg-primary-600 text-white px-3 py-1 rounded hover:bg-primary-700 transition-colors">
+                                    <button
+                                      onClick={() => handleEventClick(event)}
+                                      className="text-xs bg-primary-600 text-white px-3 py-1 rounded hover:bg-primary-700 transition-colors cursor-pointer"
+                                    >
                                       Details
                                     </button>
                                   </div>
@@ -549,6 +879,119 @@ export default function Events() {
           </div>
         </div>
       </Container>
+
+      {/* Event Details Modal */}
+      {showEventModal && selectedEvent && (
+        <div
+          className="fixed inset-0 backdrop-blur-sm bg-white/30 flex items-center justify-center p-4 z-50"
+          onClick={closeEventModal}
+        >
+          <div
+            className="bg-white rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-6">
+              <div className="flex justify-between items-start mb-4">
+                <h3 className="text-xl font-bold text-gray-900">
+                  {selectedEvent.title}
+                </h3>
+                <button
+                  onClick={closeEventModal}
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex items-center space-x-2 text-gray-600">
+                  <CalendarIcon className="w-5 h-5" />
+                  <span>{formatDate(selectedEvent.date)}</span>
+                </div>
+
+                <div className="flex items-center space-x-2 text-gray-600">
+                  <ClockIcon className="w-5 h-5" />
+                  <span>{selectedEvent.time}</span>
+                </div>
+
+                <div className="flex items-center space-x-2 text-gray-600">
+                  <MapPinIcon className="w-5 h-5" />
+                  <span>{selectedEvent.location}</span>
+                </div>
+
+                {selectedEvent.description && (
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-2">
+                      Description
+                    </h4>
+                    <p className="text-gray-600 text-sm">
+                      {selectedEvent.description}
+                    </p>
+                  </div>
+                )}
+
+                <div className="flex items-center space-x-2">
+                  <div
+                    className={`w-4 h-4 rounded-full ${getEventTypeInfo(selectedEvent.type).color}`}
+                  ></div>
+                  <span className="text-sm text-gray-600">
+                    {getEventTypeInfo(selectedEvent.type).label}
+                  </span>
+                </div>
+              </div>
+
+              <div className="mt-6 space-y-3">
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    onClick={() => openGoogleCalendar(selectedEvent)}
+                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm cursor-pointer"
+                  >
+                    Add to Google Calendar
+                  </button>
+                  <button
+                    onClick={() => openOutlookCalendar(selectedEvent)}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm cursor-pointer"
+                  >
+                    Add to Outlook Calendar
+                  </button>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    onClick={() => downloadICSFile(selectedEvent)}
+                    className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm cursor-pointer"
+                  >
+                    Download ICS
+                  </button>
+                  <button
+                    onClick={() => copyEventDetails(selectedEvent)}
+                    className="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors text-sm cursor-pointer"
+                  >
+                    Copy Details
+                  </button>
+                </div>
+                <button
+                  onClick={closeEventModal}
+                  className="w-full px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors cursor-pointer"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
