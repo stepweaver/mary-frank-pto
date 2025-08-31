@@ -23,7 +23,7 @@ const heroPanels = [
     content: (
       <div className="space-y-4">
         <h1 className="text-4xl lg:text-5xl font-bold text-white mb-3">
-          Mary Frank PTO
+          Mary Frank Elementary PTO
         </h1>
         <p className="text-white text-lg mb-4 max-w-2xl">
           We support our teachers, enhance student learning, and build strong
