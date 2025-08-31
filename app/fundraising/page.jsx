@@ -76,9 +76,18 @@ export default function Fundraising() {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <div className="bg-gradient-to-br from-primary-50 via-white to-primary-100 py-20">
+      <div className="bg-gradient-to-br from-primary-50 via-white to-primary-100 py-20 relative">
+        {/* Background Logo */}
+        <div className="absolute inset-0 flex items-center justify-center opacity-25 pointer-events-none">
+          <img
+            src="/logo-with-glow.png"
+            alt="Mary Frank PTO Logo"
+            className="w-[400px] h-[400px] object-contain"
+          />
+        </div>
+
         <Container>
-          <div className="max-w-6xl mx-auto text-center">
+          <div className="max-w-6xl mx-auto text-center relative z-10">
             <div className="mb-8">
               <h1 className="text-6xl lg:text-7xl font-bold text-gray-900 mb-8 leading-tight">
                 Support Our School

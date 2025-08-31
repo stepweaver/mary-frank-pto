@@ -1,509 +1,363 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import Container from '@/components/layout/Container'
 import {
-  HeartIcon,
-  UserGroupIcon,
-  AcademicCapIcon,
   CalendarIcon,
   ClockIcon,
   MapPinIcon,
+  UserGroupIcon,
   StarIcon,
-  TrophyIcon,
-  GiftIcon,
-  BookOpenIcon,
-  CameraIcon,
-  ComputerDesktopIcon,
-  PhoneIcon,
-  EnvelopeIcon,
-  CheckCircleIcon,
-  PlusIcon,
-  ChevronRightIcon,
-  SparklesIcon,
-  HandRaisedIcon,
+  AcademicCapIcon,
+  HeartIcon,
   UsersIcon,
+  TrophyIcon,
+  HandRaisedIcon,
+  EnvelopeIcon,
+  PhoneIcon,
+  ExclamationTriangleIcon,
 } from '@heroicons/react/24/outline'
 
-// TODO: Replace with real data from CMS/API
-// - Integrate with volunteer management system
-// - Add real-time opportunity updates
-// - Include volunteer registration/RSVP functionality
-// - Add volunteer tracking and management
-const volunteerOpportunities = [
-  {
-    id: 1,
-    title: 'PTO Event Volunteers',
-    description: 'Help organize and run PTO events throughout the school year',
-    category: 'events',
-    timeCommitment: '2-4 hours per event',
-    frequency: 'As needed',
-    location: 'School campus',
-    icon: CalendarIcon,
-    featured: true,
-    currentVolunteers: 8,
-    neededVolunteers: 15,
-    skills: ['Organization', 'Communication', 'Event Planning'],
-    impact: 'Directly supports student activities and community building',
-  },
-  {
-    id: 2,
-    title: 'Classroom Reading Helpers',
-    description:
-      'Assist teachers with reading activities and literacy programs',
-    category: 'classroom',
-    timeCommitment: '1-2 hours per week',
-    frequency: 'Weekly',
-    location: 'Individual classrooms',
-    icon: BookOpenIcon,
-    featured: true,
-    currentVolunteers: 12,
-    neededVolunteers: 20,
-    skills: ['Patience', 'Reading Skills', 'Working with Children'],
-    impact: 'Improves student reading skills and confidence',
-  },
-  {
-    id: 3,
-    title: 'Math Tutoring Support',
-    description: 'Provide one-on-one or small group math assistance',
-    category: 'classroom',
-    timeCommitment: '1-2 hours per week',
-    frequency: 'Weekly',
-    location: 'Classrooms or library',
-    icon: AcademicCapIcon,
-    featured: false,
-    currentVolunteers: 6,
-    neededVolunteers: 12,
-    skills: ['Math Skills', 'Teaching', 'Patience'],
-    impact: 'Helps students build strong math foundations',
-  },
-  {
-    id: 4,
-    title: 'Office Support Team',
-    description: 'Assist with administrative tasks and office operations',
-    category: 'administrative',
-    timeCommitment: '2-3 hours per week',
-    frequency: 'Weekly',
-    location: 'School office',
-    icon: PhoneIcon,
-    featured: false,
-    currentVolunteers: 4,
-    neededVolunteers: 8,
-    skills: ['Organization', 'Computer Skills', 'Customer Service'],
-    impact: 'Keeps school operations running smoothly',
-  },
-  {
-    id: 5,
-    title: 'Art & Creative Projects',
-    description: 'Support art teachers and creative classroom activities',
-    category: 'classroom',
-    timeCommitment: '1-3 hours per project',
-    frequency: 'Monthly',
-    location: 'Art room and classrooms',
-    icon: SparklesIcon,
-    featured: false,
-    currentVolunteers: 3,
-    neededVolunteers: 10,
-    skills: ['Creativity', 'Art Skills', 'Patience'],
-    impact: 'Enhances student creativity and artistic expression',
-  },
-  {
-    id: 6,
-    title: 'Technology Support',
-    description: 'Help with computer labs and technology integration',
-    category: 'technical',
-    timeCommitment: '2-4 hours per week',
-    frequency: 'Weekly',
-    location: 'Computer lab and classrooms',
-    icon: ComputerDesktopIcon,
-    featured: false,
-    currentVolunteers: 2,
-    neededVolunteers: 6,
-    skills: ['Computer Skills', 'Problem Solving', 'Teaching'],
-    impact: 'Prepares students for digital learning',
-  },
-  {
-    id: 7,
-    title: 'Yearbook Committee',
-    description: 'Help create and organize the school yearbook',
-    category: 'special',
-    timeCommitment: '3-5 hours per month',
-    frequency: 'Monthly',
-    location: 'School and home',
-    icon: CameraIcon,
-    featured: false,
-    currentVolunteers: 5,
-    neededVolunteers: 8,
-    skills: ['Photography', 'Design', 'Organization'],
-    impact: 'Creates lasting memories for students and families',
-  },
-  {
-    id: 8,
-    title: 'Hospitality Committee',
-    description: 'Welcome new families and organize appreciation events',
-    category: 'community',
-    timeCommitment: '2-3 hours per month',
-    frequency: 'Monthly',
-    location: 'School and community',
-    icon: GiftIcon,
-    featured: false,
-    currentVolunteers: 4,
-    neededVolunteers: 8,
-    skills: ['Communication', 'Hospitality', 'Organization'],
-    impact: 'Builds strong school community relationships',
-  },
-]
-
-const volunteerCategories = [
-  {
-    category: 'events',
-    label: 'PTO Events',
-    color: 'bg-primary-600',
-    icon: CalendarIcon,
-    description: 'Help organize and run PTO activities',
-  },
-  {
-    category: 'classroom',
-    label: 'Classroom Support',
-    color: 'bg-primary-500',
-    icon: AcademicCapIcon,
-    description: 'Direct support for teachers and students',
-  },
-  {
-    category: 'administrative',
-    label: 'Office Support',
-    color: 'bg-primary-700',
-    icon: PhoneIcon,
-    description: 'Administrative and operational help',
-  },
-  {
-    category: 'technical',
-    label: 'Technology',
-    color: 'bg-primary-400',
-    icon: ComputerDesktopIcon,
-    description: 'Computer and technology assistance',
-  },
-  {
-    category: 'special',
-    label: 'Special Projects',
-    color: 'bg-primary-300',
-    icon: StarIcon,
-    description: 'Unique and seasonal opportunities',
-  },
-  {
-    category: 'community',
-    label: 'Community Building',
-    color: 'bg-primary-800',
-    icon: UsersIcon,
-    description: 'Building school community spirit',
-  },
-]
-
-const getCategoryInfo = (category) => {
-  return (
-    volunteerCategories.find((c) => c.category === category) ||
-    volunteerCategories[0]
-  )
-}
-
-const getProgressPercentage = (current, needed) => {
-  return Math.min((current / needed) * 100, 100)
-}
-
 export default function Volunteer() {
+  const [volunteerOpportunities, setVolunteerOpportunities] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  useEffect(() => {
+    fetchVolunteerOpportunities()
+  }, [])
+
+  const fetchVolunteerOpportunities = async () => {
+    try {
+      console.log('Starting to fetch volunteer opportunities...')
+      setLoading(true)
+      const response = await fetch('/api/contentful/volunteer')
+      console.log('Response received:', response)
+      const data = await response.json()
+      console.log('Data parsed:', data)
+
+      if (data.success) {
+        setVolunteerOpportunities(data.data)
+      } else {
+        setError('Failed to fetch volunteer opportunities')
+      }
+    } catch (err) {
+      console.error('Error fetching volunteer opportunities:', err)
+      setError('Failed to load volunteer opportunities')
+    } finally {
+      console.log('Setting loading to false')
+      setLoading(false)
+    }
+  }
+
+  const getCategoryFromTitle = (title) => {
+    const lowerTitle = title.toLowerCase()
+    if (
+      lowerTitle.includes('bake sale') ||
+      lowerTitle.includes('festival') ||
+      lowerTitle.includes('event')
+    ) {
+      return 'events'
+    } else if (lowerTitle.includes('art') || lowerTitle.includes('creative')) {
+      return 'classroom'
+    } else if (
+      lowerTitle.includes('library') ||
+      lowerTitle.includes('reading')
+    ) {
+      return 'classroom'
+    } else if (lowerTitle.includes('math') || lowerTitle.includes('tutoring')) {
+      return 'classroom'
+    } else if (lowerTitle.includes('office') || lowerTitle.includes('admin')) {
+      return 'administrative'
+    } else if (lowerTitle.includes('tech') || lowerTitle.includes('computer')) {
+      return 'technical'
+    } else if (
+      lowerTitle.includes('yearbook') ||
+      lowerTitle.includes('photography')
+    ) {
+      return 'special'
+    } else if (
+      lowerTitle.includes('hospitality') ||
+      lowerTitle.includes('welcome')
+    ) {
+      return 'community'
+    }
+    return 'events'
+  }
+
+  const getIconForCategory = (category) => {
+    const iconMap = {
+      events: CalendarIcon,
+      classroom: AcademicCapIcon,
+      administrative: PhoneIcon,
+      technical: UsersIcon,
+      special: StarIcon,
+      community: UsersIcon,
+    }
+    return iconMap[category] || CalendarIcon
+  }
+
+  const getCategoryLabel = (category) => {
+    const labelMap = {
+      events: 'PTO Events',
+      classroom: 'Classroom Support',
+      administrative: 'Office Support',
+      technical: 'Technology',
+      special: 'Special Projects',
+      community: 'Community Building',
+    }
+    return labelMap[category] || 'General'
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
+        <Container className="py-8">
+          <div className="max-w-7xl mx-auto text-center">
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-primary-600 border-t-transparent"></div>
+            <p className="text-gray-600 mt-4 text-lg">
+              Loading amazing volunteer opportunities...
+            </p>
+          </div>
+        </Container>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
+        <Container className="py-8">
+          <div className="max-w-7xl mx-auto text-center">
+            <div className="bg-red-50 border border-red-200 rounded-2xl p-6 max-w-md mx-auto">
+              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <ExclamationTriangleIcon className="w-6 h-6 text-red-600" />
+              </div>
+              <p className="text-red-600 mb-4 text-lg">{error}</p>
+              <button
+                onClick={fetchVolunteerOpportunities}
+                className="bg-primary-600 text-white px-6 py-2 rounded-lg hover:bg-primary-700 transition-colors font-medium"
+              >
+                Try Again
+              </button>
+            </div>
+          </div>
+        </Container>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen">
-      <Container className="py-12">
-        <div className="max-w-7xl mx-auto">
-          {/* Hero Section */}
-          <div className="text-center mb-16">
-            <h1 className="text-5xl lg:text-6xl font-bold text-text-primary mb-6">
-              Make a Difference
-            </h1>
-            <p className="text-xl text-text-secondary max-w-3xl mx-auto leading-relaxed mb-8">
-              Join our community of dedicated volunteers and help create amazing
-              experiences for Mary Frank Elementary students, teachers, and
-              families.
-            </p>
+      {/* Hero Section with Logo Background */}
+      <div className="relative bg-gradient-to-br from-primary-50 via-white to-primary-100 overflow-hidden">
+        {/* Background Logo */}
+        <div className="absolute inset-0 flex items-center justify-center opacity-25 pointer-events-none">
+          <img
+            src="/logo-with-glow.png"
+            alt="Mary Frank PTO Logo"
+            className="w-[400px] h-[400px] object-contain"
+          />
+        </div>
 
-            {/* Volunteer Impact Stats */}
-            <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-              <div className="bg-surface border border-border rounded-xl p-6">
-                <div className="text-3xl font-bold text-primary-600 mb-2">
-                  44
+        <Container className="relative z-10 py-20">
+          <div className="max-w-7xl mx-auto text-center">
+            {/* Hero Content */}
+            <div className="mb-8">
+              <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
+                Make a Difference
+              </h1>
+              <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed mb-6">
+                Join our community of dedicated volunteers and help create
+                amazing experiences for Mary Frank Elementary students,
+                teachers, and families.
+              </p>
+            </div>
+
+            {/* Impact Stats */}
+            <div className="grid md:grid-cols-3 gap-4 max-w-3xl mx-auto">
+              <div className="bg-white/80 backdrop-blur-sm border border-white/20 rounded-xl p-4 shadow-lg">
+                <div className="text-2xl font-bold text-primary-600 mb-1">
+                  {volunteerOpportunities.reduce(
+                    (sum, opp) => sum + (opp.spots || 0),
+                    0
+                  )}
                 </div>
-                <div className="text-text-secondary">Active Volunteers</div>
-              </div>
-              <div className="bg-surface border border-border rounded-xl p-6">
-                <div className="text-3xl font-bold text-primary-600 mb-2">
-                  200+
+                <div className="text-gray-600 font-medium text-sm">
+                  Volunteer Spots Available
                 </div>
-                <div className="text-text-secondary">Hours This Month</div>
               </div>
-              <div className="bg-surface border border-border rounded-xl p-6">
-                <div className="text-3xl font-bold text-primary-600 mb-2">
+              <div className="bg-white/80 backdrop-blur-sm border border-white/20 rounded-xl p-4 shadow-lg">
+                <div className="text-2xl font-bold text-primary-600 mb-1">
+                  {volunteerOpportunities.length}
+                </div>
+                <div className="text-gray-600 font-medium text-sm">
+                  Active Opportunities
+                </div>
+              </div>
+              <div className="bg-white/80 backdrop-blur-sm border border-white/20 rounded-xl p-4 shadow-lg">
+                <div className="text-2xl font-bold text-primary-600 mb-1">
                   489
                 </div>
-                <div className="text-text-secondary">Students Impacted</div>
+                <div className="text-gray-600 font-medium text-sm">
+                  Students Impacted
+                </div>
               </div>
             </div>
           </div>
+        </Container>
+      </div>
 
-          {/* Volunteer Categories */}
-          <div className="mb-16">
-            <h2 className="text-3xl font-bold text-text-primary mb-8 text-center">
-              How You Can Help
-            </h2>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {volunteerCategories.map((cat) => (
-                <div
-                  key={cat.category}
-                  className="bg-surface border border-border rounded-xl p-6 hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
-                >
-                  <div
-                    className={`w-12 h-12 ${cat.color} rounded-lg flex items-center justify-center mb-4`}
-                  >
-                    <cat.icon className="w-6 h-6 text-white" />
-                  </div>
-                  <h3 className="font-bold text-text-primary text-lg mb-2">
-                    {cat.label}
-                  </h3>
-                  <p className="text-text-secondary text-sm mb-4">
-                    {cat.description}
-                  </p>
-                  <button className="w-full bg-primary-600 text-white py-2 px-4 rounded-lg hover:bg-primary-700 transition-colors font-medium">
-                    View Opportunities
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Featured Opportunities */}
-          <div className="mb-16">
-            <h2 className="text-3xl font-bold text-text-primary mb-8 text-center">
-              Featured Volunteer Opportunities
-            </h2>
-            <div className="grid lg:grid-cols-2 gap-8">
-              {volunteerOpportunities
-                .filter((opp) => opp.featured)
-                .map((opportunity) => (
-                  <div
-                    key={opportunity.id}
-                    className="bg-surface border border-border rounded-xl p-6 hover:shadow-lg transition-shadow"
-                  >
-                    <div className="flex items-start justify-between mb-4">
-                      <div
-                        className={`w-12 h-12 ${getCategoryInfo(opportunity.category).color} rounded-lg flex items-center justify-center`}
-                      >
-                        <opportunity.icon className="w-6 h-6 text-white" />
-                      </div>
-                      <span className="text-sm text-text-muted bg-primary-100 text-primary-700 px-2 py-1 rounded-full">
-                        {getCategoryInfo(opportunity.category).label}
-                      </span>
-                    </div>
-
-                    <h3 className="font-bold text-text-primary text-xl mb-3">
-                      {opportunity.title}
-                    </h3>
-                    <p className="text-text-secondary mb-4">
-                      {opportunity.description}
-                    </p>
-
-                    <div className="space-y-3 mb-4">
-                      <div className="flex items-center space-x-2 text-text-secondary text-sm">
-                        <ClockIcon className="w-4 h-4" />
-                        <span>{opportunity.timeCommitment}</span>
-                      </div>
-                      <div className="flex items-center space-x-2 text-text-secondary text-sm">
-                        <CalendarIcon className="w-4 h-4" />
-                        <span>{opportunity.frequency}</span>
-                      </div>
-                      <div className="flex items-center space-x-2 text-text-secondary text-sm">
-                        <MapPinIcon className="w-4 h-4" />
-                        <span>{opportunity.location}</span>
-                      </div>
-                    </div>
-
-                    {/* Volunteer Progress */}
-                    <div className="mb-4">
-                      <div className="flex justify-between text-sm text-text-secondary mb-2">
-                        <span>
-                          Volunteers: {opportunity.currentVolunteers}/
-                          {opportunity.neededVolunteers}
-                        </span>
-                        <span>
-                          {Math.round(
-                            getProgressPercentage(
-                              opportunity.currentVolunteers,
-                              opportunity.neededVolunteers
-                            )
-                          )}
-                          %
-                        </span>
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div
-                          className="bg-primary-600 h-2 rounded-full transition-all duration-300"
-                          style={{
-                            width: `${getProgressPercentage(opportunity.currentVolunteers, opportunity.neededVolunteers)}%`,
-                          }}
-                        ></div>
-                      </div>
-                    </div>
-
-                    <div className="flex flex-col sm:flex-row gap-3">
-                      <button className="flex-1 bg-primary-600 text-white py-2 px-4 rounded-lg hover:bg-primary-700 transition-colors font-medium">
-                        Sign Up
-                      </button>
-                      <button className="flex-1 border border-primary-600 text-primary-600 py-2 px-4 rounded-lg hover:bg-primary-50 transition-colors font-medium">
-                        Learn More
-                      </button>
-                    </div>
-                  </div>
-                ))}
-            </div>
-          </div>
-
-          {/* All Opportunities */}
-          <div className="mb-16">
-            <h2 className="text-3xl font-bold text-text-primary mb-8 text-center">
-              All Volunteer Opportunities
-            </h2>
-            <div className="space-y-4">
-              {volunteerOpportunities.map((opportunity) => (
-                <div
-                  key={opportunity.id}
-                  className="bg-surface border border-border rounded-xl p-6 hover:shadow-md transition-shadow"
-                >
-                  <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-start space-x-4">
-                        <div
-                          className={`w-10 h-10 ${getCategoryInfo(opportunity.category).color} rounded-lg flex items-center justify-center flex-shrink-0`}
-                        >
-                          <opportunity.icon className="w-5 h-5 text-white" />
+      <Container className="py-8">
+        <div className="max-w-7xl mx-auto">
+          {/* Volunteer Opportunities */}
+          {volunteerOpportunities.length > 0 ? (
+            <div className="mb-12">
+              <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
+                Volunteer Opportunities
+              </h2>
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {volunteerOpportunities.map((opportunity) => {
+                  const category = getCategoryFromTitle(opportunity.title)
+                  const IconComponent = getIconForCategory(category)
+                  return (
+                    <div
+                      key={opportunity.id}
+                      className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-gray-100"
+                    >
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="w-12 h-12 bg-primary-600 rounded-xl flex items-center justify-center">
+                          <IconComponent className="w-6 h-6 text-white" />
                         </div>
+                        <div className="text-right">
+                          <span className="inline-block px-3 py-1 rounded-full text-xs font-medium text-white bg-primary-600">
+                            {getCategoryLabel(category)}
+                          </span>
+                          <div className="mt-2 text-sm text-gray-500">
+                            {opportunity.spots} spot
+                            {opportunity.spots !== 1 ? 's' : ''} available
+                          </div>
+                        </div>
+                      </div>
 
-                        <div className="flex-1">
-                          <div className="flex items-center space-x-3 mb-2">
-                            <h3 className="font-bold text-text-primary text-lg">
-                              {opportunity.title}
-                            </h3>
-                            {opportunity.featured && (
-                              <span className="bg-primary-100 text-primary-700 text-xs px-2 py-1 rounded-full font-medium">
-                                Featured
-                              </span>
-                            )}
-                            <span className="text-xs text-text-muted bg-gray-100 px-2 py-1 rounded-full">
-                              {getCategoryInfo(opportunity.category).label}
+                      <h3 className="text-xl font-bold text-gray-900 mb-3">
+                        {opportunity.title}
+                      </h3>
+                      <p className="text-gray-600 mb-4 leading-relaxed">
+                        {opportunity.description}
+                      </p>
+
+                      <div className="space-y-2 mb-4">
+                        <div className="flex items-center space-x-3 text-gray-600 text-sm">
+                          <MapPinIcon className="w-4 h-4 text-primary-500" />
+                          <span>{opportunity.location}</span>
+                        </div>
+                        {opportunity.date && (
+                          <div className="flex items-center space-x-3 text-gray-600 text-sm">
+                            <CalendarIcon className="w-4 h-4 text-primary-500" />
+                            <span>
+                              {new Date(opportunity.date).toLocaleDateString(
+                                'en-US',
+                                {
+                                  weekday: 'long',
+                                  year: 'numeric',
+                                  month: 'long',
+                                  day: 'numeric',
+                                }
+                              )}
                             </span>
                           </div>
-
-                          <p className="text-text-secondary text-sm mb-3">
-                            {opportunity.description}
-                          </p>
-
-                          <div className="grid md:grid-cols-4 gap-4 text-sm mb-3">
-                            <div className="flex items-center space-x-2 text-text-secondary">
-                              <ClockIcon className="w-4 h-4" />
-                              <span>{opportunity.timeCommitment}</span>
-                            </div>
-                            <div className="flex items-center space-x-2 text-text-secondary">
-                              <CalendarIcon className="w-4 h-4" />
-                              <span>{opportunity.frequency}</span>
-                            </div>
-                            <div className="flex items-center space-x-2 text-text-secondary">
-                              <MapPinIcon className="w-4 h-4" />
-                              <span>{opportunity.location}</span>
-                            </div>
-                            <div className="flex items-center space-x-2 text-text-secondary">
-                              <UserGroupIcon className="w-4 h-4" />
-                              <span>
-                                {opportunity.currentVolunteers}/
-                                {opportunity.neededVolunteers}
-                              </span>
-                            </div>
+                        )}
+                        {opportunity.time && (
+                          <div className="flex items-center space-x-3 text-gray-600 text-sm">
+                            <ClockIcon className="w-4 h-4 text-primary-500" />
+                            <span>{opportunity.time}</span>
                           </div>
-
-                          {/* Skills Needed */}
-                          <div className="flex flex-wrap gap-2">
-                            {opportunity.skills.map((skill, index) => (
-                              <span
-                                key={index}
-                                className="text-xs bg-primary-50 text-primary-700 px-2 py-1 rounded-full"
-                              >
-                                {skill}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
+                        )}
                       </div>
-                    </div>
 
-                    <div className="mt-4 lg:mt-0 lg:ml-6 flex flex-col gap-2">
-                      <button className="bg-primary-600 text-white py-2 px-6 rounded-lg hover:bg-primary-700 transition-colors font-medium">
-                        Sign Up
-                      </button>
-                      <button className="border border-primary-600 text-primary-600 py-2 px-6 rounded-lg hover:bg-primary-50 transition-colors font-medium">
-                        Details
-                      </button>
+                      {opportunity.googleFormUrl && (
+                        <a
+                          href={opportunity.googleFormUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="block w-full bg-primary-600 text-white py-3 px-6 rounded-lg hover:bg-primary-700 transition-all duration-200 text-center font-semibold shadow-md hover:shadow-lg"
+                        >
+                          Sign Up Now
+                        </a>
+                      )}
                     </div>
-                  </div>
-                </div>
-              ))}
+                  )
+                })}
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="mb-12 text-center">
+              <div className="bg-white/80 backdrop-blur-sm border border-gray-200 rounded-xl p-8 max-w-2xl mx-auto">
+                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <CalendarIcon className="w-8 h-8 text-gray-400" />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                  No Opportunities Found
+                </h3>
+                <p className="text-gray-600 mb-4">
+                  No volunteer opportunities are currently available. Check back
+                  soon!
+                </p>
+              </div>
+            </div>
+          )}
 
           {/* Benefits Section */}
-          <div className="bg-gradient-to-r from-primary-50 to-primary-100 rounded-2xl p-8 mb-16 border border-primary-200">
-            <h2 className="text-3xl font-bold text-text-primary mb-8 text-center">
+          <div className="bg-primary-50 rounded-2xl p-8 mb-12 border border-primary-100">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
               Why Volunteer?
             </h2>
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
               <div className="text-center">
-                <div className="w-16 h-16 bg-primary-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <div className="w-16 h-16 bg-primary-600 rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg">
                   <HeartIcon className="w-8 h-8 text-white" />
                 </div>
-                <h3 className="font-semibold text-text-primary mb-2">
+                <h3 className="font-semibold text-gray-900 mb-2 text-base">
                   Make an Impact
                 </h3>
-                <p className="text-text-secondary text-sm">
+                <p className="text-gray-600 text-sm">
                   Directly help students succeed and teachers thrive
                 </p>
               </div>
 
               <div className="text-center">
-                <div className="w-16 h-16 bg-primary-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <div className="w-16 h-16 bg-primary-600 rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg">
                   <UsersIcon className="w-8 h-8 text-white" />
                 </div>
-                <h3 className="font-semibold text-text-primary mb-2">
+                <h3 className="font-semibold text-gray-900 mb-2 text-base">
                   Build Community
                 </h3>
-                <p className="text-text-secondary text-sm">
+                <p className="text-gray-600 text-sm">
                   Connect with other parents and school staff
                 </p>
               </div>
 
               <div className="text-center">
-                <div className="w-16 h-16 bg-primary-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <StarIcon className="w-8 h-8 text-white" />
+                <div className="w-16 h-16 bg-primary-600 rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg">
+                  <TrophyIcon className="w-8 h-8 text-white" />
                 </div>
-                <h3 className="font-semibold text-text-primary mb-2">
+                <h3 className="font-semibold text-gray-900 mb-2 text-base">
                   Gain Experience
                 </h3>
-                <p className="text-text-secondary text-sm">
+                <p className="text-gray-600 text-sm">
                   Develop new skills and leadership abilities
                 </p>
               </div>
 
               <div className="text-center">
-                <div className="w-16 h-16 bg-primary-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <TrophyIcon className="w-8 h-8 text-white" />
+                <div className="w-16 h-16 bg-primary-600 rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg">
+                  <StarIcon className="w-8 h-8 text-white" />
                 </div>
-                <h3 className="font-semibold text-text-primary mb-2">
+                <h3 className="font-semibold text-gray-900 mb-2 text-base">
                   Get Recognition
                 </h3>
-                <p className="text-text-secondary text-sm">
+                <p className="text-gray-600 text-sm">
                   Be celebrated for your contributions
                 </p>
               </div>
@@ -511,22 +365,22 @@ export default function Volunteer() {
           </div>
 
           {/* Call to Action */}
-          <div className="text-center bg-surface border-2 border-primary-200 rounded-2xl p-8 mb-16">
-            <h2 className="text-3xl font-bold text-text-primary mb-4">
+          <div className="text-center bg-white rounded-2xl p-8 mb-12 shadow-lg border border-gray-100">
+            <h2 className="text-2xl font-bold text-gray-900 mb-3">
               Ready to Get Started?
             </h2>
-            <p className="text-lg text-text-secondary mb-6 max-w-2xl mx-auto">
+            <p className="text-lg text-gray-600 mb-6 max-w-2xl mx-auto">
               Join our amazing team of volunteers and help make Mary Frank
               Elementary the best it can be for our students and community.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="inline-flex items-center px-8 py-4 bg-primary-600 text-white font-semibold rounded-lg hover:bg-primary-700 transition-colors text-lg">
-                <HandRaisedIcon className="w-6 h-6 mr-2" />
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <button className="inline-flex items-center px-6 py-3 bg-primary-600 text-white font-semibold rounded-lg hover:bg-primary-700 transition-all duration-200 shadow-md hover:shadow-lg">
+                <HandRaisedIcon className="w-5 h-5 mr-2" />
                 Become a Volunteer
               </button>
               <a
                 href="/events"
-                className="inline-flex items-center px-8 py-4 border-2 border-primary-600 text-primary-600 font-semibold rounded-lg hover:bg-primary-50 transition-colors text-lg"
+                className="inline-flex items-center px-6 py-3 border border-primary-600 text-primary-600 font-semibold rounded-lg hover:bg-primary-50 transition-colors"
               >
                 View Upcoming Events
               </a>
@@ -534,27 +388,27 @@ export default function Volunteer() {
           </div>
 
           {/* Contact Section */}
-          <div className="bg-surface border border-border rounded-2xl p-8 text-center">
-            <h2 className="text-2xl font-bold text-text-primary mb-4">
+          <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl p-8 text-center">
+            <h2 className="text-xl font-bold text-gray-900 mb-3">
               Questions About Volunteering?
             </h2>
-            <p className="text-text-secondary mb-6">
+            <p className="text-gray-600 mb-6">
               Our volunteer coordinator is here to help you find the perfect
               opportunity and answer any questions you might have.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <a
                 href="mailto:volunteer@maryfrankpto.org"
-                className="inline-flex items-center px-6 py-3 bg-primary-600 text-white font-semibold rounded-lg hover:bg-primary-700 transition-colors"
+                className="inline-flex items-center px-4 py-2 bg-primary-600 text-white font-semibold rounded-lg hover:bg-primary-700 transition-colors shadow-md hover:shadow-lg text-sm"
               >
-                <EnvelopeIcon className="w-5 h-5 mr-2" />
+                <EnvelopeIcon className="w-4 h-4 mr-2" />
                 Email Us
               </a>
               <a
                 href="tel:+15742720340"
-                className="inline-flex items-center px-6 py-3 border-2 border-primary-600 text-primary-600 font-semibold rounded-lg hover:bg-primary-50 transition-colors"
+                className="inline-flex items-center px-4 py-2 border border-primary-600 text-primary-600 font-semibold rounded-lg hover:bg-primary-50 transition-colors text-sm"
               >
-                <PhoneIcon className="w-5 h-5 mr-2" />
+                <PhoneIcon className="w-4 h-4 mr-2" />
                 Call Us
               </a>
             </div>
