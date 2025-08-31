@@ -10,8 +10,6 @@ export async function GET() {
       order: ['-fields.startDate']
     });
 
-    console.log('🔍 Raw Contentful response:', JSON.stringify(response.items, null, 2));
-
     // Process fundraisers data
     const fundraisers = response.items.map(fundraiser => {
       const processed = {
@@ -29,7 +27,6 @@ export async function GET() {
         category: fundraiser.fields.category
       };
 
-      console.log('📊 Processed fundraiser:', processed);
       return processed;
     });
 
@@ -40,7 +37,7 @@ export async function GET() {
     return NextResponse.json(responseData);
 
   } catch (error) {
-    console.error('❌ Error fetching fundraising data:', error);
+    console.error('Error fetching fundraising data:', error);
     return NextResponse.json(
       { error: 'Failed to fetch fundraising data' },
       { status: 500 }
