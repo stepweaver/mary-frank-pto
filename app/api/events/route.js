@@ -16,12 +16,22 @@ export async function GET(request) {
     const maxResults = parseInt(searchParams.get("maxResults")) || 5;
     const calendarId = searchParams.get("calendarId") || process.env.GOOGLE_CALENDAR_ID;
 
+    // Debug logging
+    console.log("Environment check:", {
+      hasEmail: !!process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
+      hasKey: !!process.env.GOOGLE_PRIVATE_KEY,
+      hasCalendarId: !!calendarId,
+      calendarId: calendarId,
+      maxResults: maxResults
+    });
+
     // Check if required environment variables are set
     if (!calendarId) {
       console.error("Missing calendar ID");
       return Response.json({
         success: false,
         error: "Calendar configuration missing",
+        debug: { calendarId, envCalendarId: process.env.GOOGLE_CALENDAR_ID }
       }, { status: 500 });
     }
 
@@ -30,8 +40,14 @@ export async function GET(request) {
       return Response.json({
         success: false,
         error: "Authentication configuration missing",
+        debug: {
+          hasEmail: !!process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
+          hasKey: !!process.env.GOOGLE_PRIVATE_KEY
+        }
       }, { status: 500 });
     }
+
+    console.log("Attempting to fetch events from calendar:", calendarId);
 
     const response = await calendar.events.list({
       calendarId: calendarId,
@@ -39,6 +55,11 @@ export async function GET(request) {
       maxResults: maxResults,
       singleEvents: true,
       orderBy: "startTime",
+    });
+
+    console.log("Calendar API response received:", {
+      hasItems: !!response.data.items,
+      itemCount: response.data.items?.length || 0
     });
 
     const events = response.data.items?.map((event) => {
@@ -65,16 +86,29 @@ export async function GET(request) {
       };
     }) || [];
 
+    console.log("Events processed:", events.length);
+
     return Response.json({
       success: true,
       data: { events },
     });
   } catch (error) {
     console.error("Error fetching calendar events:", error);
+    console.error("Error details:", {
+      message: error.message,
+      code: error.code,
+      status: error.status,
+      stack: error.stack
+    });
 
     return Response.json({
       success: false,
       error: "Failed to fetch events",
+      debug: {
+        message: error.message,
+        code: error.code,
+        status: error.status
+      }
     }, { status: 500 });
   }
 }
