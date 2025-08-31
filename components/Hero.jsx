@@ -141,11 +141,18 @@ export default function Hero() {
     try {
       const response = await fetch('/api/events?maxResults=3')
       const data = await response.json()
+
       if (data.success) {
         setEvents(data.data.events)
+      } else {
+        console.error('Events API returned error:', data.error)
+        // Set empty events array but don't show error to user for now
+        setEvents([])
       }
     } catch (error) {
       console.error('Error fetching events:', error)
+      // Set empty events array but don't show error to user for now
+      setEvents([])
     } finally {
       setLoading(false)
     }

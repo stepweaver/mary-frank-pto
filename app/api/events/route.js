@@ -3,7 +3,7 @@ import { google } from "googleapis";
 const auth = new google.auth.GoogleAuth({
   credentials: {
     client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
-    private_key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, "\\n"),
+    private_key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
   },
   scopes: ["https://www.googleapis.com/auth/calendar.readonly"],
 });
@@ -12,6 +12,23 @@ const calendar = google.calendar({ version: "v3", auth });
 
 export async function GET(request) {
   try {
+    // Check if required environment variables are set
+    if (!process.env.GOOGLE_CALENDAR_ID) {
+      console.error("Missing GOOGLE_CALENDAR_ID environment variable");
+      return Response.json({
+        success: false,
+        error: "Calendar configuration missing",
+      }, { status: 500 });
+    }
+
+    if (!process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL || !process.env.GOOGLE_PRIVATE_KEY) {
+      console.error("Missing Google service account credentials");
+      return Response.json({
+        success: false,
+        error: "Authentication configuration missing",
+      }, { status: 500 });
+    }
+
     const { searchParams } = new URL(request.url);
     const maxResults = parseInt(searchParams.get("maxResults")) || 5;
 
@@ -23,7 +40,7 @@ export async function GET(request) {
       orderBy: "startTime",
     });
 
-    const events = response.data.items.map((event) => {
+    const events = response.data.items?.map((event) => {
       const start = event.start.dateTime || event.start.date;
       const end = event.end.dateTime || event.end.date;
 
@@ -45,7 +62,7 @@ export async function GET(request) {
           minute: "2-digit",
         }),
       };
-    });
+    }) || [];
 
     return Response.json({
       success: true,
@@ -53,9 +70,10 @@ export async function GET(request) {
     });
   } catch (error) {
     console.error("Error fetching calendar events:", error);
+
     return Response.json({
       success: false,
       error: "Failed to fetch events",
-    });
+    }, { status: 500 });
   }
 }

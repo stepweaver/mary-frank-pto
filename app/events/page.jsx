@@ -1,3 +1,6 @@
+'use client'
+
+import { useState, useEffect } from 'react'
 import Container from '@/components/layout/Container'
 import {
   CalendarIcon,
@@ -16,154 +19,7 @@ import {
   BookOpenIcon,
 } from '@heroicons/react/24/outline'
 
-// TODO: Replace with real data from CMS/API
-// - Integrate with Contentful, Strapi, or custom API
-// - Add real-time event updates
-// - Implement event filtering and search
-// - Add pagination for large event lists
-// - Include event registration/RSVP functionality
-const upcomingEvents = [
-  {
-    id: 1,
-    title: 'PTO General Meeting',
-    date: '2024-01-15',
-    time: '6:30 PM - 8:00 PM',
-    location: 'School Library',
-    type: 'meeting',
-    description:
-      'Monthly PTO meeting to discuss upcoming events, budget updates, and volunteer opportunities. All parents are welcome to attend.',
-    icon: UserGroupIcon,
-    featured: true,
-    // TODO: Add real event fields:
-    // - registrationRequired: boolean
-    // - maxAttendees: number
-    // - currentAttendees: number
-    // - eventImage: string (URL)
-    // - contactPerson: string
-    // - contactEmail: string
-    // - contactPhone: string
-    // - eventUrl: string (external link)
-    // - tags: string[]
-    // - category: string
-    // - ageGroup: string
-    // - cost: number
-    // - isRecurring: boolean
-    // - recurrencePattern: string
-  },
-  {
-    id: 2,
-    title: 'Spirit Wear Sales',
-    date: '2024-01-20',
-    time: 'All Day',
-    location: 'Online & School Office',
-    type: 'fundraiser',
-    description:
-      'Order your Mary Frank Mustangs spirit wear! Hoodies, t-shirts, and accessories available. Orders delivered to school for pickup.',
-    icon: ShoppingBagIcon,
-    featured: false,
-  },
-  {
-    id: 3,
-    title: 'Teacher Appreciation Week',
-    date: '2024-02-05',
-    time: 'All Week',
-    location: 'School-wide',
-    type: 'appreciation',
-    description:
-      'Show our amazing teachers how much we care! Daily themes and activities to celebrate our dedicated staff.',
-    icon: HeartIcon,
-    featured: true,
-  },
-  {
-    id: 4,
-    title: 'Book Fair',
-    date: '2024-02-12',
-    time: '8:00 AM - 4:00 PM',
-    location: 'School Gymnasium',
-    type: 'fundraiser',
-    description:
-      "Scholastic Book Fair featuring the latest children's books. Proceeds benefit our school library and literacy programs.",
-    icon: BookOpenIcon,
-    featured: false,
-  },
-  {
-    id: 5,
-    title: 'Family Fun Night',
-    date: '2024-02-23',
-    time: '6:00 PM - 8:00 PM',
-    location: 'School Cafeteria & Gym',
-    type: 'social',
-    description:
-      'Join us for an evening of games, activities, and fun for the whole family! Food trucks, face painting, and more.',
-    icon: MusicalNoteIcon,
-    featured: true,
-  },
-  {
-    id: 6,
-    title: 'Spring Picture Day',
-    date: '2024-03-08',
-    time: 'During School Hours',
-    location: 'School Auditorium',
-    type: 'school',
-    description:
-      'Spring portrait sessions for all students. Professional photography with multiple background options.',
-    icon: CameraIcon,
-    featured: false,
-  },
-  {
-    id: 7,
-    title: 'Running is Elementary',
-    date: '2024-04-15',
-    time: '2:00 PM - 3:00 PM',
-    location: 'School Track',
-    type: 'fitness',
-    description:
-      'Annual one-mile run for 4th and 5th grade students. Promote fitness and school spirit!',
-    icon: TrophyIcon,
-    featured: true,
-  },
-  {
-    id: 8,
-    title: "Beef O'Brady's Give Back Night",
-    date: '2024-04-22',
-    time: '5:00 PM - 9:00 PM',
-    location: "Beef O'Brady's Granger",
-    type: 'fundraiser',
-    description:
-      "Dine at Beef O'Brady's and 20% of your bill goes to Mary Frank PTO! Mention our school when ordering.",
-    icon: FireIcon,
-    featured: false,
-  },
-  {
-    id: 9,
-    title: 'Volunteer Appreciation Luncheon',
-    date: '2024-05-10',
-    time: '11:30 AM - 1:00 PM',
-    location: 'School Cafeteria',
-    type: 'appreciation',
-    description:
-      'Special luncheon to thank all our amazing volunteers for their dedication throughout the school year.',
-    icon: GiftIcon,
-    featured: false,
-  },
-  {
-    id: 10,
-    title: 'End of Year Celebration',
-    date: '2024-05-24',
-    time: '5:00 PM - 7:00 PM',
-    location: 'School Playground',
-    type: 'social',
-    description:
-      'Celebrate the end of another great school year with games, food, and fun activities for all families.',
-    icon: StarIcon,
-    featured: true,
-  },
-]
-
-// TODO: Move event types to CMS/API configuration
-// - Allow PTO admins to add/edit event types
-// - Support custom colors and icons
-// - Add type descriptions and usage guidelines
+// Event type definitions with icons and colors
 const eventTypes = [
   {
     type: 'meeting',
@@ -203,20 +59,40 @@ const eventTypes = [
   },
 ]
 
-// TODO: Implement proper event type lookup with error handling
-// - Add validation for event types
-// - Handle missing event types gracefully
-// - Add fallback icon and color
+// Helper function to determine event type based on title/description
+const getEventType = (event) => {
+  const title = event.title?.toLowerCase() || ''
+  const description = event.description?.toLowerCase() || ''
+
+  if (title.includes('meeting') || description.includes('meeting'))
+    return 'meeting'
+  if (
+    title.includes('fundraiser') ||
+    title.includes('sale') ||
+    title.includes('fair')
+  )
+    return 'fundraiser'
+  if (title.includes('appreciation') || title.includes('thank'))
+    return 'appreciation'
+  if (
+    title.includes('social') ||
+    title.includes('fun') ||
+    title.includes('night')
+  )
+    return 'social'
+  if (title.includes('volunteer') || description.includes('volunteer'))
+    return 'school'
+  if (title.includes('fitness') || title.includes('sport')) return 'fitness'
+
+  return 'meeting' // default
+}
+
+// Get event type info with fallback
 const getEventTypeInfo = (type) => {
   return eventTypes.find((t) => t.type === type) || eventTypes[0]
 }
 
-// TODO: Enhance date formatting and timezone handling
-// - Add timezone support for events
-// - Format relative dates (e.g., "Tomorrow", "Next Week")
-// - Handle recurring events
-// - Add date validation
-// - Support multiple date formats
+// Format date for display
 const formatDate = (dateString) => {
   const date = new Date(dateString)
   return date.toLocaleDateString('en-US', {
@@ -226,52 +102,63 @@ const formatDate = (dateString) => {
   })
 }
 
-// TODO: Add state management for events
-// - Implement loading states
-// - Add error handling for failed API calls
-// - Add event filtering and search
-// - Implement event pagination
-// - Add event sorting options
+// Format time for display
+const formatTime = (dateString) => {
+  const date = new Date(dateString)
+  return date.toLocaleTimeString('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+  })
+}
+
 export default function Events() {
-  // TODO: Add React hooks for data management
-  // const [events, setEvents] = useState([])
-  // const [loading, setLoading] = useState(true)
-  // const [error, setError] = useState(null)
-  // const [filterType, setFilterType] = useState('all')
-  // const [searchQuery, setSearchQuery] = useState('')
-  // const [currentPage, setCurrentPage] = useState(1)
+  const [events, setEvents] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
 
-  // TODO: Add useEffect for data fetching
-  // useEffect(() => {
-  //   fetchEvents()
-  // }, [])
+  useEffect(() => {
+    fetchEvents()
+  }, [])
 
-  // TODO: Implement data fetching function
-  // const fetchEvents = async () => {
-  //   try {
-  //     setLoading(true)
-  //     const response = await fetch('/api/events')
-  //     const data = await response.json()
-  //     setEvents(data)
-  //   } catch (err) {
-  //     setError(err.message)
-  //   } finally {
-  //     setLoading(false)
-  //   }
-  // }
+  const fetchEvents = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      const response = await fetch('/api/events?maxResults=50')
+      const data = await response.json()
 
-  // TODO: Add event filtering function
-  // const filteredEvents = events.filter(event => {
-  //   if (filterType !== 'all' && event.type !== filterType) return false
-  //   if (searchQuery && !event.title.toLowerCase().includes(searchQuery.toLowerCase())) return false
-  //   return true
-  // })
+      if (data.success) {
+        setEvents(data.data.events)
+      } else {
+        setError(data.error || 'Failed to fetch events')
+      }
+    } catch (err) {
+      console.error('Error fetching events:', err)
+      setError('Failed to fetch events. Please try again later.')
+    } finally {
+      setLoading(false)
+    }
+  }
 
-  // TODO: Add event search and filter UI
-  // - Search input field
-  // - Type filter dropdown
-  // - Date range picker
-  // - Featured events toggle
+  // Transform Google Calendar events to match the original structure
+  const transformedEvents = events.map((event) => ({
+    id: event.id,
+    title: event.title,
+    date: event.start,
+    time: event.end
+      ? `${formatTime(event.start)} - ${formatTime(event.end)}`
+      : formatTime(event.start),
+    location: event.location || 'TBD',
+    type: getEventType(event),
+    description: event.description || '',
+    icon: getEventTypeInfo(getEventType(event)).icon,
+    featured: false, // You can add logic to determine featured events
+  }))
+
+  // Filter featured events (you can customize this logic)
+  const featuredEvents = transformedEvents.filter((event) => event.featured)
+  const allEvents = transformedEvents
 
   return (
     <div className="min-h-screen">
@@ -288,78 +175,37 @@ export default function Events() {
             </p>
           </div>
 
-          {/* TODO: Add search and filter controls */}
-          {/* <div className="mb-8">
-            <div className="flex flex-col md:flex-row gap-4">
-              <input
-                type="text"
-                placeholder="Search events..."
-                className="flex-1 px-4 py-2 border border-border rounded-lg"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-              <select
-                value={filterType}
-                onChange={(e) => setFilterType(e.target.value)}
-                className="px-4 py-2 border border-border rounded-lg"
-              >
-                <option value="all">All Types</option>
-                {eventTypes.map(type => (
-                  <option key={type.type} value={type.type}>{type.label}</option>
-                ))}
-              </select>
+          {/* Loading State */}
+          {loading && (
+            <div className="text-center py-12">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+              <p className="mt-2 text-text-secondary">Loading events...</p>
             </div>
-          </div> */}
+          )}
 
-          {/* Event Type Legend */}
-          <div className="mb-12">
-            <h2 className="text-2xl font-bold text-text-primary mb-6 text-center">
-              Event Types
-            </h2>
-            <div className="flex flex-wrap justify-center gap-4">
-              {eventTypes.map((eventType) => (
-                <div
-                  key={eventType.type}
-                  className="flex items-center space-x-2 bg-surface border border-border rounded-lg px-4 py-2"
+          {/* Error State */}
+          {error && (
+            <div className="text-center py-12">
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4 max-w-md mx-auto">
+                <p className="text-red-800">{error}</p>
+                <button
+                  onClick={fetchEvents}
+                  className="mt-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
                 >
-                  <div
-                    className={`w-3 h-3 rounded-full ${eventType.color}`}
-                  ></div>
-                  <span className="text-text-secondary text-sm font-medium">
-                    {eventType.label}
-                  </span>
-                </div>
-              ))}
+                  Try Again
+                </button>
+              </div>
             </div>
-          </div>
-
-          {/* TODO: Add loading state */}
-          {/* {loading && (
-            <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
-              <p className="mt-4 text-text-secondary">Loading events...</p>
-            </div>
-          )} */}
-
-          {/* TODO: Add error state */}
-          {/* {error && (
-            <div className="text-center py-12">
-              <p className="text-red-600">Error loading events: {error}</p>
-              <button onClick={fetchEvents} className="mt-4 px-4 py-2 bg-primary-600 text-white rounded-lg">
-                Try Again
-              </button>
-            </div>
-          )} */}
+          )}
 
           {/* Featured Events */}
-          <div className="mb-16">
-            <h2 className="text-3xl font-bold text-text-primary mb-8 text-center">
-              Featured Events
-            </h2>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {upcomingEvents
-                .filter((event) => event.featured)
-                .map((event) => (
+          {!loading && !error && featuredEvents.length > 0 && (
+            <div className="mb-16">
+              <h2 className="text-3xl font-bold text-text-primary mb-8 text-center">
+                Featured Events
+              </h2>
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {featuredEvents.map((event) => (
                   <div
                     key={event.id}
                     className="bg-surface border border-border rounded-xl p-6 hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
@@ -394,93 +240,272 @@ export default function Events() {
                       {event.description}
                     </p>
 
-                    {/* TODO: Implement event detail modal/page */}
                     <button className="w-full bg-primary-600 text-white py-2 px-4 rounded-lg hover:bg-primary-700 transition-colors font-medium">
                       Learn More
                     </button>
                   </div>
                 ))}
+              </div>
             </div>
-          </div>
+          )}
 
-          {/* All Events List */}
-          <div className="mb-16">
-            <h2 className="text-3xl font-bold text-text-primary mb-8 text-center">
-              All Upcoming Events
-            </h2>
-            <div className="space-y-4">
-              {upcomingEvents.map((event) => (
-                <div
-                  key={event.id}
-                  className="bg-surface border border-border rounded-xl p-6 hover:shadow-md transition-shadow"
-                >
-                  <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-start space-x-4">
+          {/* Calendar Grid View */}
+          {!loading && !error && (
+            <div className="mb-16">
+              {/* Desktop Calendar Grid - Hidden on mobile */}
+              <div className="hidden md:block bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden relative">
+                {/* Background Logo */}
+                <div className="absolute inset-0 flex items-center justify-center opacity-25 pointer-events-none">
+                  <img
+                    src="/logo-with-glow.png"
+                    alt="Mary Frank PTO Logo"
+                    className="w-[600px] h-[600px] object-contain"
+                  />
+                </div>
+
+                {/* Calendar Header */}
+                <div className="bg-primary-50 px-6 py-4 border-b border-gray-200 relative z-10">
+                  <h2 className="text-3xl font-bold text-text-primary text-center">
+                    {new Date().toLocaleDateString('en-US', {
+                      month: 'long',
+                      year: 'numeric',
+                    })}
+                  </h2>
+                </div>
+
+                {/* Calendar Grid */}
+                <div className="p-4 relative z-10">
+                  {/* Day Headers */}
+                  <div className="grid grid-cols-7 gap-0 mb-2">
+                    {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(
+                      (day) => (
                         <div
-                          className={`w-10 h-10 ${getEventTypeInfo(event.type).color} rounded-lg flex items-center justify-center flex-shrink-0`}
+                          key={day}
+                          className="text-sm font-semibold text-gray-600 text-center py-2 border-b border-gray-200"
                         >
-                          <event.icon className="w-5 h-5 text-white" />
+                          {day}
                         </div>
+                      )
+                    )}
+                  </div>
 
-                        <div className="flex-1">
-                          <div className="flex items-center space-x-3 mb-2">
-                            <h3 className="font-bold text-text-primary text-lg">
-                              {event.title}
-                            </h3>
-                            {event.featured && (
-                              <span className="bg-primary-100 text-primary-700 text-xs px-2 py-1 rounded-full font-medium">
-                                Featured
-                              </span>
-                            )}
+                  {/* Calendar Days */}
+                  <div className="grid grid-cols-7 gap-0">
+                    {(() => {
+                      const month = new Date().getMonth()
+                      const year = new Date().getFullYear()
+                      const daysInMonth = new Date(year, month + 1, 0).getDate()
+                      const firstDayOfMonth = new Date(year, month, 1).getDay()
+                      const calendarGrid = []
+
+                      // Add empty cells for days before the first day of the month
+                      for (let i = 0; i < firstDayOfMonth; i++) {
+                        calendarGrid.push(
+                          <div
+                            key={`empty-${i}`}
+                            className="min-h-[200px] border-r border-b border-gray-200 bg-gray-50"
+                          ></div>
+                        )
+                      }
+
+                      // Add days of the month
+                      for (let day = 1; day <= daysInMonth; day++) {
+                        const date = new Date(year, month, day)
+                        const isToday =
+                          date.toDateString() === new Date().toDateString()
+                        const dayEvents = allEvents.filter(
+                          (event) => new Date(event.date).getDate() === day
+                        )
+
+                        calendarGrid.push(
+                          <div
+                            key={`day-${day}`}
+                            className="min-h-[200px] border-r border-b border-gray-200 p-2"
+                          >
+                            <div className="flex flex-col h-full">
+                              {/* Day Header */}
+                              <div className="flex justify-between items-center mb-2">
+                                <span
+                                  className={`text-sm font-medium ${
+                                    isToday
+                                      ? 'bg-primary-600 text-white rounded-full w-6 h-6 flex items-center justify-center'
+                                      : 'text-gray-900'
+                                  }`}
+                                >
+                                  {day}
+                                </span>
+                                {dayEvents.length > 0 && (
+                                  <span className="text-xs text-primary-600 font-medium">
+                                    {dayEvents.length} event
+                                    {dayEvents.length !== 1 ? 's' : ''}
+                                  </span>
+                                )}
+                              </div>
+
+                              {/* Events Container */}
+                              <div className="flex-1 space-y-2 overflow-y-auto">
+                                {dayEvents.map((event, index) => (
+                                  <div
+                                    key={`event-${index}`}
+                                    className="bg-primary-50 border border-primary-200 rounded-lg p-2 text-xs hover:bg-primary-100 transition-colors cursor-pointer"
+                                  >
+                                    <div className="font-medium text-primary-900 mb-1 line-clamp-2">
+                                      {event.title}
+                                    </div>
+                                    <div className="text-primary-700 space-y-1">
+                                      <div className="flex items-center space-x-1">
+                                        <ClockIcon className="w-3 h-3 flex-shrink-0" />
+                                        <span className="truncate">
+                                          {event.time}
+                                        </span>
+                                      </div>
+                                      <div className="flex items-center space-x-1">
+                                        <MapPinIcon className="w-3 h-3 flex-shrink-0" />
+                                        <span className="truncate">
+                                          {event.location}
+                                        </span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
                           </div>
+                        )
+                      }
 
-                          <div className="grid md:grid-cols-3 gap-4 text-sm">
-                            <div className="flex items-center space-x-2 text-text-secondary">
-                              <CalendarIcon className="w-4 h-4" />
-                              <span>{formatDate(event.date)}</span>
-                            </div>
-                            <div className="flex items-center space-x-2 text-text-secondary">
-                              <ClockIcon className="w-4 h-4" />
-                              <span>{event.time}</span>
-                            </div>
-                            <div className="flex items-center space-x-2 text-text-secondary">
-                              <MapPinIcon className="w-4 h-4" />
-                              <span>{event.location}</span>
-                            </div>
-                          </div>
-
-                          <p className="text-text-secondary text-sm mt-3">
-                            {event.description}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="mt-4 lg:mt-0 lg:ml-6">
-                      {/* TODO: Implement event detail modal/page */}
-                      <button className="bg-primary-600 text-white py-2 px-6 rounded-lg hover:bg-primary-700 transition-colors font-medium">
-                        Details
-                      </button>
-                    </div>
+                      return calendarGrid
+                    })()}
                   </div>
                 </div>
-              ))}
-            </div>
-          </div>
+              </div>
 
-          {/* TODO: Add pagination for large event lists */}
-          {/* <div className="flex justify-center mt-8">
-            <div className="flex space-x-2">
-              <button className="px-3 py-2 border border-border rounded-lg hover:bg-primary-50">
-                Previous
-              </button>
-              <span className="px-3 py-2">Page 1 of 3</span>
-              <button className="px-3 py-2 border border-border rounded-lg hover:bg-primary-50">
-                Next
-              </button>
+              {/* Mobile Calendar List - Visible only on mobile */}
+              <div className="md:hidden bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden relative">
+                {/* Background Logo for Mobile */}
+                <div className="absolute inset-0 flex items-center justify-center opacity-5 pointer-events-none">
+                  <img
+                    src="/logo-with-glow.png"
+                    alt="Mary Frank PTO Logo"
+                    className="w-80 h-80 object-contain"
+                  />
+                </div>
+
+                {/* Calendar Header */}
+                <div className="bg-primary-50 px-4 py-3 border-b border-gray-200">
+                  <h3 className="text-lg font-semibold text-primary-900 text-center">
+                    {new Date().toLocaleDateString('en-US', {
+                      month: 'long',
+                      year: 'numeric',
+                    })}
+                  </h3>
+                </div>
+
+                {/* Mobile Calendar Days List */}
+                <div className="divide-y divide-gray-200">
+                  {(() => {
+                    const month = new Date().getMonth()
+                    const year = new Date().getFullYear()
+                    const daysInMonth = new Date(year, month + 1, 0).getDate()
+                    const mobileCalendar = []
+
+                    for (let day = 1; day <= daysInMonth; day++) {
+                      const date = new Date(year, month, day)
+                      const isToday =
+                        date.toDateString() === new Date().toDateString()
+                      const dayEvents = allEvents.filter(
+                        (event) => new Date(event.date).getDate() === day
+                      )
+                      const dayName = new Date(
+                        year,
+                        month,
+                        day
+                      ).toLocaleDateString('en-US', { weekday: 'short' })
+
+                      if (dayEvents.length > 0) {
+                        mobileCalendar.push(
+                          <div key={`mobile-day-${day}`} className="p-4">
+                            <div className="flex items-center justify-between mb-3">
+                              <div className="flex items-center space-x-3">
+                                <span
+                                  className={`text-lg font-bold ${
+                                    isToday
+                                      ? 'bg-primary-600 text-white rounded-full w-8 h-8 flex items-center justify-center'
+                                      : 'text-gray-900'
+                                  }`}
+                                >
+                                  {day}
+                                </span>
+                                <span className="text-sm text-gray-600 font-medium">
+                                  {dayName}
+                                </span>
+                              </div>
+                              <span className="text-sm text-primary-600 font-medium">
+                                {dayEvents.length} event
+                                {dayEvents.length !== 1 ? 's' : ''}
+                              </span>
+                            </div>
+                            <div className="space-y-3">
+                              {dayEvents.map((event, index) => (
+                                <div
+                                  key={`mobile-event-${index}`}
+                                  className="bg-primary-50 border border-primary-200 rounded-lg p-4"
+                                >
+                                  <h4 className="font-semibold text-primary-900 text-base mb-2">
+                                    {event.title}
+                                  </h4>
+                                  {event.description && (
+                                    <p className="text-sm text-primary-700 mb-3 line-clamp-2">
+                                      {event.description}
+                                    </p>
+                                  )}
+                                  <div className="flex items-center space-x-4 text-xs text-primary-700 mb-3">
+                                    <span className="flex items-center space-x-1">
+                                      <ClockIcon className="w-3 h-3" />
+                                      <span>{event.time}</span>
+                                    </span>
+                                    <span className="flex items-center space-x-1">
+                                      <MapPinIcon className="w-3 h-3" />
+                                      <span>{event.location}</span>
+                                    </span>
+                                  </div>
+                                  <div className="flex items-center justify-between">
+                                    <div className="flex items-center space-x-2">
+                                      <div
+                                        className={`w-3 h-3 rounded-full ${getEventTypeInfo(event.type).color}`}
+                                      ></div>
+                                      <span className="text-xs text-primary-600 font-medium">
+                                        {getEventTypeInfo(event.type).label}
+                                      </span>
+                                    </div>
+                                    <button className="text-xs bg-primary-600 text-white px-3 py-1 rounded hover:bg-primary-700 transition-colors">
+                                      Details
+                                    </button>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )
+                      }
+                    }
+
+                    // If no events this month, show a message
+                    if (mobileCalendar.length === 0) {
+                      return (
+                        <div className="p-8 text-center text-gray-500">
+                          <CalendarIcon className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                          <p>No events scheduled for this month</p>
+                        </div>
+                      )
+                    }
+
+                    return mobileCalendar
+                  })()}
+                </div>
+              </div>
             </div>
-          </div> */}
+          )}
 
           {/* Call to Action */}
           <div className="bg-gradient-to-r from-primary-50 to-primary-100 rounded-2xl p-8 border border-primary-200 text-center">
@@ -517,12 +542,6 @@ export default function Events() {
               Know of a great event or fundraiser that would benefit our school?
               We'd love to hear from you!
             </p>
-            {/* TODO: Implement event submission form */}
-            {/* - Add form modal/page */}
-            {/* - Include fields: title, description, suggested date, contact info */}
-            {/* - Add form validation */}
-            {/* - Send to PTO email or CMS */}
-            {/* - Add success/error feedback */}
             <button className="inline-flex items-center px-6 py-3 bg-primary-600 text-white font-semibold rounded-lg hover:bg-primary-700 transition-colors">
               <HeartIcon className="w-5 h-5 mr-2" />
               Suggest an Event
