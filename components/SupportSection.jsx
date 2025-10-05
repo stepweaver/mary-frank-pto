@@ -4,7 +4,7 @@ import { UserGroupIcon, HeartIcon, CubeIcon } from '@heroicons/react/24/outline'
 export default function SupportSection() {
   return (
     <section className="pt-8 md:pt-16 pb-16 bg-gradient-to-br from-slate-50 to-green-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-12">
           {/* Donate Items Card */}
           <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-8 border border-slate-100">
@@ -84,7 +84,7 @@ export default function SupportSection() {
                 <HeartIcon className="w-8 h-8 text-white" />
               </div>
               <h3 className="text-2xl font-bold text-slate-800 mb-4">
-                Meet Our Staff
+                Show Your Support
               </h3>
               <p className="text-slate-600 mb-6 leading-relaxed">
                 Get to know our amazing educators! Browse detailed staff
@@ -95,7 +95,7 @@ export default function SupportSection() {
                 href="/teacher-requests"
                 className="inline-flex items-center bg-[#00b140] text-white px-8 py-4 rounded-xl font-semibold hover:bg-[#009a38] transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
               >
-                Meet Our Staff
+                Show Your Support
                 <svg
                   className="w-5 h-5 ml-2"
                   fill="none"

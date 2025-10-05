@@ -62,7 +62,38 @@ export default function TeacherRequestsPage() {
       const dept = teacher['Grade Level Taught/Department/Position'] || 'Other'
       departments.add(dept)
     })
-    return ['all', ...Array.from(departments)]
+
+    // Convert to array and sort logically
+    const deptArray = Array.from(departments)
+
+    // Define the logical order
+    const order = [
+      'all',
+      'Pre-K',
+      'Kindergarten',
+      '1st Grade',
+      '2nd Grade',
+      '3rd Grade',
+      '4th Grade',
+      '5th Grade',
+      'P.E. Department',
+      'Music Department',
+      'Library',
+      'Administration',
+      'Support Staff',
+      'Other',
+    ]
+
+    // Sort departments according to the defined order
+    const sortedDepts = order.filter((dept) => {
+      if (dept === 'all') return true
+      return deptArray.includes(dept)
+    })
+
+    // Add any departments not in our predefined list at the end
+    const remainingDepts = deptArray.filter((dept) => !order.includes(dept))
+
+    return [...sortedDepts, ...remainingDepts.sort()]
   }
 
   const filteredTeachers =
@@ -155,7 +186,7 @@ export default function TeacherRequestsPage() {
           <div className="max-w-7xl mx-auto text-center">
             <div className="mb-8">
               <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
-                Meet Our Amazing Staff
+                Show Your Support
               </h1>
               <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed mb-6">
                 Get to know the incredible educators who make Mary Frank
@@ -167,8 +198,9 @@ export default function TeacherRequestsPage() {
         </Container>
       </div>
 
-      <Container className="py-8">
-        <div className="max-w-7xl mx-auto">
+      {/* Full width container for maximum space usage */}
+      <div className="py-8 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1400px] mx-auto">
           {/* Staff Profiles Section */}
           <div className="mb-16">
             <div className="text-center mb-12">
@@ -190,7 +222,7 @@ export default function TeacherRequestsPage() {
                   <button
                     key={dept}
                     onClick={() => setFilter(dept)}
-                    className={`px-4 py-2 rounded-full font-medium transition-all duration-300 text-sm ${
+                    className={`px-4 py-2 rounded-full font-medium transition-all duration-300 text-sm cursor-pointer ${
                       filter === dept
                         ? 'bg-primary-600 text-white shadow-lg transform scale-105'
                         : 'bg-white text-gray-600 hover:bg-gray-100 shadow-md hover:shadow-lg border border-gray-200'
@@ -202,8 +234,8 @@ export default function TeacherRequestsPage() {
               </div>
             )}
 
-            {/* Teacher Profiles Grid - More compact */}
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {/* Teacher Profiles Grid - Wide cards using full space */}
+            <div className="space-y-6">
               {filteredTeachers.map((teacher, index) => (
                 <div
                   key={teacher.id}
@@ -211,171 +243,223 @@ export default function TeacherRequestsPage() {
                 >
                   {/* Colorful header */}
                   <div
-                    className={`h-3 bg-gradient-to-r ${getRandomColor(index)}`}
+                    className={`h-4 bg-gradient-to-r ${getRandomColor(index)}`}
                   ></div>
 
-                  <div className="p-4">
-                    {/* Teacher Name & Position */}
-                    <div className="text-center mb-4">
-                      <h3 className="text-lg font-bold text-gray-900 mb-1">
-                        {teacher['Name'] || 'Staff Member'}
-                      </h3>
-                      <p className="text-primary-600 font-semibold text-sm">
-                        {teacher['Grade Level Taught/Department/Position']}
-                      </p>
-                      {teacher['Birthday'] && (
-                        <div className="flex items-center justify-center text-xs text-gray-500 mt-1">
-                          <GiftIcon className="w-3 h-3 mr-1" />
-                          Birthday:{' '}
-                          {formatBirthday(teacher['Birthday']) ||
-                            teacher['Birthday']}
-                        </div>
-                      )}
-                    </div>
+                  <div className="p-8">
+                    <div className="grid lg:grid-cols-4 gap-8">
+                      {/* Column 1: Name and Basic Info */}
+                      <div className="lg:col-span-1">
+                        <div className="text-center lg:text-left">
+                          <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                            {teacher['Name'] || 'Staff Member'}
+                          </h3>
+                          <p className="text-primary-600 font-semibold mb-3">
+                            {teacher['Grade Level Taught/Department/Position']}
+                          </p>
+                          {teacher['Birthday'] && (
+                            <div className="flex items-center justify-center lg:justify-start text-sm text-gray-500 mb-4">
+                              <GiftIcon className="w-4 h-4 mr-2" />
+                              Birthday:{' '}
+                              {formatBirthday(teacher['Birthday']) ||
+                                teacher['Birthday']}
+                            </div>
+                          )}
 
-                    {/* Personal Details - Condensed */}
-                    <div className="space-y-2">
-                      {teacher['Favorite Color'] && (
-                        <div className="flex items-center gap-1">
-                          <SparklesIcon className="w-3 h-3 text-primary-500" />
-                          <span className="text-xs text-gray-600">
-                            <strong>Color:</strong> {teacher['Favorite Color']}
-                          </span>
+                          {/* Dietary Restrictions - prominent placement */}
+                          {teacher['Dietary Restrictions'] && (
+                            <div className="p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+                              <div className="flex items-start">
+                                <ExclamationTriangleIcon className="w-4 h-4 text-yellow-600 mr-2 mt-0.5" />
+                                <div>
+                                  <p className="text-sm font-semibold text-yellow-800 mb-1">
+                                    Dietary Restrictions
+                                  </p>
+                                  <p className="text-sm text-yellow-700">
+                                    {teacher['Dietary Restrictions']}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          )}
                         </div>
-                      )}
+                      </div>
 
-                      {teacher['Favorite Hobby'] && (
-                        <div className="flex items-center gap-1">
-                          <StarIcon className="w-3 h-3 text-primary-500" />
-                          <span className="text-xs text-gray-600">
-                            <strong>Hobby:</strong> {teacher['Favorite Hobby']}
-                          </span>
-                        </div>
-                      )}
-
-                      {teacher['Favorite Restaurants'] && (
-                        <div className="flex items-center gap-1">
-                          <HomeIcon className="w-3 h-3 text-primary-500" />
-                          <span className="text-xs text-gray-600">
-                            <strong>Restaurant:</strong>{' '}
-                            {teacher['Favorite Restaurants']}
-                          </span>
-                        </div>
-                      )}
-
-                      {teacher['Favorite Store'] && (
-                        <div className="flex items-center gap-1">
-                          <BuildingOfficeIcon className="w-3 h-3 text-primary-500" />
-                          <span className="text-xs text-gray-600">
-                            <strong>Store:</strong> {teacher['Favorite Store']}
-                          </span>
-                        </div>
-                      )}
-
-                      {teacher['Favorite Coffee/tea Drink'] && (
-                        <div className="flex items-center gap-1">
-                          <BeakerIcon className="w-3 h-3 text-primary-500" />
-                          <span className="text-xs text-gray-600">
-                            <strong>Drink:</strong>{' '}
-                            {teacher['Favorite Coffee/tea Drink']}
-                          </span>
-                        </div>
-                      )}
-
-                      {teacher['Favorite Snack'] && (
-                        <div className="flex items-center gap-1">
-                          <GiftIcon className="w-3 h-3 text-primary-500" />
-                          <span className="text-xs text-gray-600">
-                            <strong>Snack:</strong> {teacher['Favorite Snack']}
-                          </span>
-                        </div>
-                      )}
-
-                      {teacher['Favorite Candy'] && (
-                        <div className="flex items-center gap-1">
-                          <HeartIcon className="w-3 h-3 text-primary-500" />
-                          <span className="text-xs text-gray-600">
-                            <strong>Candy:</strong> {teacher['Favorite Candy']}
-                          </span>
-                        </div>
-                      )}
-
-                      {teacher['Favorite Candle Scent'] && (
-                        <div className="flex items-center gap-1">
-                          <SunIcon className="w-3 h-3 text-primary-500" />
-                          <span className="text-xs text-gray-600">
-                            <strong>Candle:</strong>{' '}
-                            {teacher['Favorite Candle Scent']}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Classroom Needs - Condensed */}
-                    {(teacher['Top Classroom Supply Wishes'] ||
-                      teacher['Favorite Classroom Supplies']) && (
-                      <div className="mt-3 p-2 bg-primary-50 rounded-lg border border-primary-100">
-                        <h4 className="font-semibold text-gray-900 mb-1 flex items-center text-xs">
-                          <AcademicCapIcon className="w-3 h-3 mr-1 text-primary-600" />
-                          Classroom Wishes
+                      {/* Column 2: Personal Favorites */}
+                      <div className="lg:col-span-1">
+                        <h4 className="font-semibold text-gray-900 mb-4 flex items-center">
+                          <HeartIcon className="w-5 h-5 mr-2 text-primary-600" />
+                          Personal Favorites
                         </h4>
-                        {teacher['Top Classroom Supply Wishes'] && (
-                          <p className="text-xs text-gray-600 mb-1">
-                            <strong>Needs:</strong>{' '}
-                            {teacher['Top Classroom Supply Wishes']}
-                          </p>
-                        )}
-                        {teacher['Favorite Classroom Supplies'] && (
-                          <p className="text-xs text-gray-600">
-                            <strong>Loves:</strong>{' '}
-                            {teacher['Favorite Classroom Supplies']}
-                          </p>
+                        <div className="space-y-3">
+                          {teacher['Favorite Color'] && (
+                            <div className="flex items-center gap-3">
+                              <SparklesIcon className="w-4 h-4 text-primary-500" />
+                              <span className="text-sm text-gray-600">
+                                <strong>Color:</strong>{' '}
+                                {teacher['Favorite Color']}
+                              </span>
+                            </div>
+                          )}
+
+                          {teacher['Favorite Hobby'] && (
+                            <div className="flex items-center gap-3">
+                              <StarIcon className="w-4 h-4 text-primary-500" />
+                              <span className="text-sm text-gray-600">
+                                <strong>Hobby:</strong>{' '}
+                                {teacher['Favorite Hobby']}
+                              </span>
+                            </div>
+                          )}
+
+                          {teacher['Favorite Restaurants'] && (
+                            <div className="flex items-center gap-3">
+                              <HomeIcon className="w-4 h-4 text-primary-500" />
+                              <span className="text-sm text-gray-600">
+                                <strong>Restaurant:</strong>{' '}
+                                {teacher['Favorite Restaurants']}
+                              </span>
+                            </div>
+                          )}
+
+                          {teacher['Favorite Store'] && (
+                            <div className="flex items-center gap-3">
+                              <BuildingOfficeIcon className="w-4 h-4 text-primary-500" />
+                              <span className="text-sm text-gray-600">
+                                <strong>Store:</strong>{' '}
+                                {teacher['Favorite Store']}
+                              </span>
+                            </div>
+                          )}
+
+                          {teacher['Favorite Coffee/tea Drink'] && (
+                            <div className="flex items-center gap-3">
+                              <BeakerIcon className="w-4 h-4 text-primary-500" />
+                              <span className="text-sm text-gray-600">
+                                <strong>Drink:</strong>{' '}
+                                {teacher['Favorite Coffee/tea Drink']}
+                              </span>
+                            </div>
+                          )}
+
+                          {teacher['Favorite Snack'] && (
+                            <div className="flex items-center gap-3">
+                              <GiftIcon className="w-4 h-4 text-primary-500" />
+                              <span className="text-sm text-gray-600">
+                                <strong>Snack:</strong>{' '}
+                                {teacher['Favorite Snack']}
+                              </span>
+                            </div>
+                          )}
+
+                          {teacher['Favorite Candy'] && (
+                            <div className="flex items-center gap-3">
+                              <HeartIcon className="w-4 h-4 text-primary-500" />
+                              <span className="text-sm text-gray-600">
+                                <strong>Candy:</strong>{' '}
+                                {teacher['Favorite Candy']}
+                              </span>
+                            </div>
+                          )}
+
+                          {teacher['Favorite Candle Scent'] && (
+                            <div className="flex items-center gap-3">
+                              <SunIcon className="w-4 h-4 text-primary-500" />
+                              <span className="text-sm text-gray-600">
+                                <strong>Candle:</strong>{' '}
+                                {teacher['Favorite Candle Scent']}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Column 3: Classroom Needs */}
+                      <div className="lg:col-span-1">
+                        {(teacher['Top Classroom Supply Wishes'] ||
+                          teacher['Favorite Classroom Supplies']) && (
+                          <div>
+                            <h4 className="font-semibold text-gray-900 mb-4 flex items-center">
+                              <AcademicCapIcon className="w-5 h-5 mr-2 text-primary-600" />
+                              Classroom Wishes
+                            </h4>
+                            <div className="p-4 bg-primary-50 rounded-lg border border-primary-100">
+                              {teacher['Top Classroom Supply Wishes'] && (
+                                <div className="mb-3">
+                                  <p className="text-sm font-semibold text-gray-800 mb-1">
+                                    Most Needed:
+                                  </p>
+                                  <p className="text-sm text-gray-600">
+                                    {teacher['Top Classroom Supply Wishes']}
+                                  </p>
+                                </div>
+                              )}
+                              {teacher['Favorite Classroom Supplies'] && (
+                                <div>
+                                  <p className="text-sm font-semibold text-gray-800 mb-1">
+                                    Always Loves:
+                                  </p>
+                                  <p className="text-sm text-gray-600">
+                                    {teacher['Favorite Classroom Supplies']}
+                                  </p>
+                                </div>
+                              )}
+                            </div>
+                          </div>
                         )}
                       </div>
-                    )}
 
-                    {/* Gift Card Preferences - Condensed */}
-                    <div className="mt-2 space-y-1">
-                      {teacher[
-                        'If you found a gift card for $5, where would you want it to be from?'
-                      ] && (
-                        <div className="flex items-center text-xs text-gray-500">
-                          <CreditCardIcon className="w-3 h-3 mr-1" />
-                          $5:{' '}
-                          {
-                            teacher[
-                              'If you found a gift card for $5, where would you want it to be from?'
-                            ]
-                          }
-                        </div>
-                      )}
-                      {teacher[
-                        'If you found a gift card or $20, where would you want it to be from?'
-                      ] && (
-                        <div className="flex items-center text-xs text-gray-500">
-                          <CreditCardIcon className="w-3 h-3 mr-1" />
-                          $20:{' '}
-                          {
-                            teacher[
-                              'If you found a gift card or $20, where would you want it to be from?'
-                            ]
-                          }
-                        </div>
-                      )}
+                      {/* Column 4: Gift Card Preferences */}
+                      <div className="lg:col-span-1">
+                        {(teacher[
+                          'If you found a gift card for $5, where would you want it to be from?'
+                        ] ||
+                          teacher[
+                            'If you found a gift card or $20, where would you want it to be from?'
+                          ]) && (
+                          <div>
+                            <h4 className="font-semibold text-gray-900 mb-4 flex items-center">
+                              <CreditCardIcon className="w-5 h-5 mr-2 text-primary-600" />
+                              Gift Card Preferences
+                            </h4>
+                            <div className="space-y-3">
+                              {teacher[
+                                'If you found a gift card for $5, where would you want it to be from?'
+                              ] && (
+                                <div className="p-3 bg-green-50 rounded-lg border border-green-200">
+                                  <p className="text-sm font-semibold text-green-800 mb-1">
+                                    $5 Gift Card
+                                  </p>
+                                  <p className="text-sm text-green-700">
+                                    {
+                                      teacher[
+                                        'If you found a gift card for $5, where would you want it to be from?'
+                                      ]
+                                    }
+                                  </p>
+                                </div>
+                              )}
+                              {teacher[
+                                'If you found a gift card or $20, where would you want it to be from?'
+                              ] && (
+                                <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                                  <p className="text-sm font-semibold text-blue-800 mb-1">
+                                    $20 Gift Card
+                                  </p>
+                                  <p className="text-sm text-blue-700">
+                                    {
+                                      teacher[
+                                        'If you found a gift card or $20, where would you want it to be from?'
+                                      ]
+                                    }
+                                  </p>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     </div>
-
-                    {/* Dietary Restrictions */}
-                    {teacher['Dietary Restrictions'] && (
-                      <div className="mt-2 p-2 bg-yellow-50 rounded-lg border border-yellow-200">
-                        <div className="flex items-start">
-                          <ExclamationTriangleIcon className="w-3 h-3 text-yellow-600 mr-1 mt-0.5" />
-                          <p className="text-xs text-yellow-800">
-                            <strong>Dietary:</strong>{' '}
-                            {teacher['Dietary Restrictions']}
-                          </p>
-                        </div>
-                      </div>
-                    )}
                   </div>
                 </div>
               ))}
@@ -412,18 +496,18 @@ export default function TeacherRequestsPage() {
                 </p>
               </div>
 
-              <div className="grid md:grid-cols-3 gap-6">
+              <div className="grid md:grid-cols-3 gap-8">
                 {/* Classroom Supplies */}
-                <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-                  <div className="text-center mb-4">
-                    <div className="w-12 h-12 bg-primary-600 rounded-full flex items-center justify-center mx-auto mb-3">
-                      <BookOpenIcon className="w-6 h-6 text-white" />
+                <div className="bg-white rounded-xl shadow-lg p-8 border border-gray-100">
+                  <div className="text-center mb-6">
+                    <div className="w-16 h-16 bg-primary-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <BookOpenIcon className="w-8 h-8 text-white" />
                     </div>
-                    <h3 className="text-lg font-bold text-gray-900">
+                    <h3 className="text-xl font-bold text-gray-900">
                       Classroom Supplies
                     </h3>
                   </div>
-                  <div className="space-y-1">
+                  <div className="space-y-2">
                     {[
                       ...new Set(
                         data.anonymousItems
@@ -431,10 +515,10 @@ export default function TeacherRequestsPage() {
                           .map((item) => item.item)
                       ),
                     ]
-                      .slice(0, 6)
+                      .slice(0, 8)
                       .map((item, index) => (
-                        <div key={index} className="flex items-center gap-2">
-                          <span className="text-primary-500 text-xs">•</span>
+                        <div key={index} className="flex items-center gap-3">
+                          <span className="text-primary-500">•</span>
                           <span className="text-sm text-gray-600">{item}</span>
                         </div>
                       ))}
@@ -442,16 +526,16 @@ export default function TeacherRequestsPage() {
                 </div>
 
                 {/* $5 Gift Cards */}
-                <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-                  <div className="text-center mb-4">
-                    <div className="w-12 h-12 bg-primary-600 rounded-full flex items-center justify-center mx-auto mb-3">
-                      <CreditCardIcon className="w-6 h-6 text-white" />
+                <div className="bg-white rounded-xl shadow-lg p-8 border border-gray-100">
+                  <div className="text-center mb-6">
+                    <div className="w-16 h-16 bg-primary-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <CreditCardIcon className="w-8 h-8 text-white" />
                     </div>
-                    <h3 className="text-lg font-bold text-gray-900">
+                    <h3 className="text-xl font-bold text-gray-900">
                       $5 Gift Cards
                     </h3>
                   </div>
-                  <div className="space-y-1">
+                  <div className="space-y-2">
                     {[
                       ...new Set(
                         data.anonymousItems
@@ -459,10 +543,10 @@ export default function TeacherRequestsPage() {
                           .map((item) => item.item)
                       ),
                     ]
-                      .slice(0, 6)
+                      .slice(0, 8)
                       .map((item, index) => (
-                        <div key={index} className="flex items-center gap-2">
-                          <span className="text-primary-500 text-xs">•</span>
+                        <div key={index} className="flex items-center gap-3">
+                          <span className="text-primary-500">•</span>
                           <span className="text-sm text-gray-600">{item}</span>
                         </div>
                       ))}
@@ -470,16 +554,16 @@ export default function TeacherRequestsPage() {
                 </div>
 
                 {/* $20 Gift Cards */}
-                <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-                  <div className="text-center mb-4">
-                    <div className="w-12 h-12 bg-primary-600 rounded-full flex items-center justify-center mx-auto mb-3">
-                      <GiftIcon className="w-6 h-6 text-white" />
+                <div className="bg-white rounded-xl shadow-lg p-8 border border-gray-100">
+                  <div className="text-center mb-6">
+                    <div className="w-16 h-16 bg-primary-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <GiftIcon className="w-8 h-8 text-white" />
                     </div>
-                    <h3 className="text-lg font-bold text-gray-900">
+                    <h3 className="text-xl font-bold text-gray-900">
                       $20 Gift Cards
                     </h3>
                   </div>
-                  <div className="space-y-1">
+                  <div className="space-y-2">
                     {[
                       ...new Set(
                         data.anonymousItems
@@ -487,10 +571,10 @@ export default function TeacherRequestsPage() {
                           .map((item) => item.item)
                       ),
                     ]
-                      .slice(0, 6)
+                      .slice(0, 8)
                       .map((item, index) => (
-                        <div key={index} className="flex items-center gap-2">
-                          <span className="text-primary-500 text-xs">•</span>
+                        <div key={index} className="flex items-center gap-3">
+                          <span className="text-primary-500">•</span>
                           <span className="text-sm text-gray-600">{item}</span>
                         </div>
                       ))}
@@ -513,105 +597,105 @@ export default function TeacherRequestsPage() {
               </p>
             </div>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {/* Birthday Celebrations */}
-              <div className="bg-white rounded-xl shadow-lg p-6 text-center border border-gray-100">
-                <div className="w-12 h-12 bg-primary-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <GiftIcon className="w-6 h-6 text-white" />
+              <div className="bg-white rounded-xl shadow-lg p-8 text-center border border-gray-100">
+                <div className="w-16 h-16 bg-primary-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <GiftIcon className="w-8 h-8 text-white" />
                 </div>
-                <h3 className="text-lg font-bold text-gray-900 mb-3">
+                <h3 className="text-xl font-bold text-gray-900 mb-4">
                   Birthday Celebrations
                 </h3>
-                <p className="text-gray-600 text-sm mb-4">
+                <p className="text-gray-600 mb-6">
                   Check the staff profiles to see upcoming birthdays and
                   surprise them with their favorite treats!
                 </p>
-                <div className="text-xs text-gray-500">
+                <div className="text-sm text-gray-500">
                   Tip: Look for their favorite restaurants and stores
                 </div>
               </div>
 
               {/* Random Acts of Kindness */}
-              <div className="bg-white rounded-xl shadow-lg p-6 text-center border border-gray-100">
-                <div className="w-12 h-12 bg-primary-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <HeartIcon className="w-6 h-6 text-white" />
+              <div className="bg-white rounded-xl shadow-lg p-8 text-center border border-gray-100">
+                <div className="w-16 h-16 bg-primary-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <HeartIcon className="w-8 h-8 text-white" />
                 </div>
-                <h3 className="text-lg font-bold text-gray-900 mb-3">
+                <h3 className="text-xl font-bold text-gray-900 mb-4">
                   Random Kindness
                 </h3>
-                <p className="text-gray-600 text-sm mb-4">
+                <p className="text-gray-600 mb-6">
                   Surprise a teacher any day with their favorite coffee, snack,
                   or a small gift card!
                 </p>
-                <div className="text-xs text-gray-500">
+                <div className="text-sm text-gray-500">
                   Tip: Check their favorite drinks and snacks
                 </div>
               </div>
 
               {/* Classroom Support */}
-              <div className="bg-white rounded-xl shadow-lg p-6 text-center border border-gray-100">
-                <div className="w-12 h-12 bg-primary-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <AcademicCapIcon className="w-6 h-6 text-white" />
+              <div className="bg-white rounded-xl shadow-lg p-8 text-center border border-gray-100">
+                <div className="w-16 h-16 bg-primary-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <AcademicCapIcon className="w-8 h-8 text-white" />
                 </div>
-                <h3 className="text-lg font-bold text-gray-900 mb-3">
+                <h3 className="text-xl font-bold text-gray-900 mb-4">
                   Classroom Support
                 </h3>
-                <p className="text-gray-600 text-sm mb-4">
+                <p className="text-gray-600 mb-6">
                   Help teachers create amazing learning environments with
                   supplies from their wish lists.
                 </p>
-                <div className="text-xs text-gray-500">
+                <div className="text-sm text-gray-500">
                   Tip: Look for "Classroom Wishes" sections
                 </div>
               </div>
 
               {/* Holiday & Special Occasions */}
-              <div className="bg-white rounded-xl shadow-lg p-6 text-center border border-gray-100">
-                <div className="w-12 h-12 bg-primary-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <SparklesIcon className="w-6 h-6 text-white" />
+              <div className="bg-white rounded-xl shadow-lg p-8 text-center border border-gray-100">
+                <div className="w-16 h-16 bg-primary-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <SparklesIcon className="w-8 h-8 text-white" />
                 </div>
-                <h3 className="text-lg font-bold text-gray-900 mb-3">
+                <h3 className="text-xl font-bold text-gray-900 mb-4">
                   Holiday Treats
                 </h3>
-                <p className="text-gray-600 text-sm mb-4">
+                <p className="text-gray-600 mb-6">
                   During holidays, consider their favorite candle scents,
                   candies, or gift cards.
                 </p>
-                <div className="text-xs text-gray-500">
+                <div className="text-sm text-gray-500">
                   Tip: Note any dietary restrictions
                 </div>
               </div>
 
               {/* Team Building */}
-              <div className="bg-white rounded-xl shadow-lg p-6 text-center border border-gray-100">
-                <div className="w-12 h-12 bg-primary-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <UserGroupIcon className="w-6 h-6 text-white" />
+              <div className="bg-white rounded-xl shadow-lg p-8 text-center border border-gray-100">
+                <div className="w-16 h-16 bg-primary-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <UserGroupIcon className="w-8 h-8 text-white" />
                 </div>
-                <h3 className="text-lg font-bold text-gray-900 mb-3">
+                <h3 className="text-xl font-bold text-gray-900 mb-4">
                   Get to Know Staff
                 </h3>
-                <p className="text-gray-600 text-sm mb-4">
+                <p className="text-gray-600 mb-6">
                   Use the profiles to start conversations and build connections
                   with our educators.
                 </p>
-                <div className="text-xs text-gray-500">
+                <div className="text-sm text-gray-500">
                   Tip: Ask about their hobbies at school events
                 </div>
               </div>
 
               {/* Show Appreciation */}
-              <div className="bg-white rounded-xl shadow-lg p-6 text-center border border-gray-100">
-                <div className="w-12 h-12 bg-primary-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <StarIcon className="w-6 h-6 text-white" />
+              <div className="bg-white rounded-xl shadow-lg p-8 text-center border border-gray-100">
+                <div className="w-16 h-16 bg-primary-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <StarIcon className="w-8 h-8 text-white" />
                 </div>
-                <h3 className="text-lg font-bold text-gray-900 mb-3">
+                <h3 className="text-xl font-bold text-gray-900 mb-4">
                   Show Appreciation
                 </h3>
-                <p className="text-gray-600 text-sm mb-4">
+                <p className="text-gray-600 mb-6">
                   Write thank you notes or organize appreciation events for our
                   school community.
                 </p>
-                <div className="text-xs text-gray-500">
+                <div className="text-sm text-gray-500">
                   Tip: Personal notes mean the world to educators
                 </div>
               </div>
@@ -620,7 +704,7 @@ export default function TeacherRequestsPage() {
 
           {/* Call to Action */}
           <div className="text-center">
-            <div className="bg-white rounded-2xl shadow-lg p-8 max-w-3xl mx-auto border border-gray-100">
+            <div className="bg-white rounded-2xl shadow-lg p-8 max-w-4xl mx-auto border border-gray-100">
               <h3 className="text-2xl font-bold text-gray-900 mb-4">
                 Ready to Make a Difference?
               </h3>
@@ -655,7 +739,7 @@ export default function TeacherRequestsPage() {
             </div>
           </div>
         </div>
-      </Container>
+      </div>
     </div>
   )
 }
